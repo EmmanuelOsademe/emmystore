@@ -6,7 +6,9 @@ import com.emmydev.ecommerce.client.entity.VerificationToken;
 import com.emmydev.ecommerce.client.exception.UserAlreadyExistsException;
 import com.emmydev.ecommerce.client.exception.UserNotFoundException;
 import com.emmydev.ecommerce.client.exception.TokenNotFoundException;
+import com.emmydev.ecommerce.client.model.LoginModel;
 import com.emmydev.ecommerce.client.model.PasswordModel;
+import com.emmydev.ecommerce.client.model.ResponseModel;
 import com.emmydev.ecommerce.client.model.UserModel;
 
 import java.util.Optional;
@@ -37,4 +39,6 @@ public interface UserService {
     User validateOldPassword(String email, String oldPassword) throws UserNotFoundException;
 
     String updatePassword(PasswordModel passwordModel) throws UserNotFoundException;
+
+    ResponseModel<Object> login(LoginModel loginDetails);
 }

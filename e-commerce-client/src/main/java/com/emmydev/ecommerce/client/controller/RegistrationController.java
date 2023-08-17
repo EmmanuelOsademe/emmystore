@@ -7,13 +7,16 @@ import com.emmydev.ecommerce.client.event.RegistrationCompleteEvent;
 import com.emmydev.ecommerce.client.exception.UserAlreadyExistsException;
 import com.emmydev.ecommerce.client.exception.UserNotFoundException;
 import com.emmydev.ecommerce.client.exception.TokenNotFoundException;
+import com.emmydev.ecommerce.client.model.LoginModel;
 import com.emmydev.ecommerce.client.model.PasswordModel;
+import com.emmydev.ecommerce.client.model.ResponseModel;
 import com.emmydev.ecommerce.client.model.UserModel;
 import com.emmydev.ecommerce.client.service.user.UserService;
 import com.emmydev.ecommerce.client.util.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -88,6 +91,11 @@ public class RegistrationController {
         // Get message from the updatePassword service
         String successMessage = userService.updatePassword(passwordModel);
         return successMessage;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ResponseModel<Object>> login(@Valid @RequestBody LoginModel loginData){
+        return ResponseEntity.ok(userService.login(loginData));
     }
 
     private String getApplicationUrl(HttpServletRequest request){

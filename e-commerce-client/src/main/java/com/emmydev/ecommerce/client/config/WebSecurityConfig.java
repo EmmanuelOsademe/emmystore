@@ -37,8 +37,7 @@ public class WebSecurityConfig {
             "/verifyRegistration",
             "/resendVerificationToken",
             "/resetPassword",
-            "/savePassword",
-            "/greetings/hello"
+            "/savePassword"
     };
 
     @Bean
@@ -51,8 +50,13 @@ public class WebSecurityConfig {
         httpSecurity
                 .csrf().disable()
                 .authorizeHttpRequests().antMatchers(WHITE_LIST_URLs).permitAll()
-                .anyRequest().authenticated().and().cors().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authenticationProvider(authenticationProvider())
+                .anyRequest().authenticated()
+                .and()
+                .cors()
+                .and().
+                sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();

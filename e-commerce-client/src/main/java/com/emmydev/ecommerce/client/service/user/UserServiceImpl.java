@@ -4,18 +4,28 @@ import com.emmydev.ecommerce.client.entity.PasswordResetToken;
 import com.emmydev.ecommerce.client.entity.Role;
 import com.emmydev.ecommerce.client.entity.User;
 import com.emmydev.ecommerce.client.entity.VerificationToken;
+import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import com.emmydev.ecommerce.client.exception.UserAlreadyExistsException;
 import com.emmydev.ecommerce.client.exception.UserNotFoundException;
 import com.emmydev.ecommerce.client.exception.TokenNotFoundException;
+import com.emmydev.ecommerce.client.model.LoginModel;
 import com.emmydev.ecommerce.client.model.PasswordModel;
+import com.emmydev.ecommerce.client.model.ResponseModel;
 import com.emmydev.ecommerce.client.model.UserModel;
 import com.emmydev.ecommerce.client.repository.PasswordResetRepository;
 import com.emmydev.ecommerce.client.repository.RoleRepository;
 import com.emmydev.ecommerce.client.repository.UserRepository;
 import com.emmydev.ecommerce.client.repository.VerificationTokenRepository;
+import com.emmydev.ecommerce.client.service.JwtService;
+import com.emmydev.ecommerce.client.service.UserDetailsServiceImpl;
 import com.emmydev.ecommerce.client.service.user.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,21 +36,25 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private VerificationTokenRepository verificationTokenRepository;
 
-    @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
     private PasswordResetRepository passwordResetRepository;
-    @Autowired
+
     private PasswordEncoder passwordEncoder;
+
+    private AuthenticationManager authenticationManager;
+
+    private UserDetailsServiceImpl userDetailsService;
+
+    private JwtService jwtService;
+
 
     @Override
     public User registerUser(UserModel userModel) throws UserAlreadyExistsException {
@@ -244,5 +258,20 @@ public class UserServiceImpl implements UserService {
         changePassword(user, passwordModel.getNewPassword());
 
         return "Password successfully updated";
+    }
+
+    @Override
+    public ResponseModel<Object> login(LoginModel loginDetails) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDetails.getEmail(), loginDetails.getPassword()));
+
+        UserDetails user = userDetailsService.loadUserByUsername(loginDetails.getEmail());
+
+        String jwtToken = jwtService.generateToken(user);
+
+        return ResponseModel.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("You have successfully logged in")
+                .data(jwtToken)
+                .build();
     }
 }
