@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password:
+    url: jdbc:postgresql://localhost:5432/emmystore
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+
+#com.mysql.cj.jdbc.Driver
