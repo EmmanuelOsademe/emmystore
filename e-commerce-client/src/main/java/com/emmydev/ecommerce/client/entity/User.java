@@ -27,7 +27,7 @@ public class User {
 
     @ManyToOne(
             cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
     @JoinColumn(
             name = "role_id",

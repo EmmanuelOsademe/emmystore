@@ -12,7 +12,7 @@ import com.emmydev.ecommerce.client.model.PasswordModel;
 import com.emmydev.ecommerce.client.model.ResponseModel;
 import com.emmydev.ecommerce.client.model.UserModel;
 import com.emmydev.ecommerce.client.service.user.UserService;
-import com.emmydev.ecommerce.client.util.EmailService;
+import com.emmydev.ecommerce.client.service.email.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -37,7 +37,13 @@ public class RegistrationController {
     @PostMapping("/register")
     public String registerUser(@Valid @RequestBody UserModel userModel, final HttpServletRequest request) throws UserAlreadyExistsException {
         User user = userService.registerUser(userModel);
+
+        log.info(user.toString());
         publisher.publishEvent(new RegistrationCompleteEvent(user, getApplicationUrl(request)));
+
+        if(user.getRole().getRole() == "ADMIN"){
+            return "You account has been registered as admin";
+        }
         return "Your account has been registered.\nPlease check your mail to verify your account";
     }
 
@@ -80,7 +86,7 @@ public class RegistrationController {
     }
 
     @PostMapping("/savePassword")
-    public String savePassword(@RequestParam("token") String resetToken, @RequestBody String password) throws TokenNotFoundException {
+    public String savePassword(@RequestParam("token") String resetToken, @RequestBody String password) throws TokenNotFoundException, UserNotFoundException {
         // Get the message from the savePassword service
         String successMessage = userService.savePassword(resetToken, password);
         return successMessage;

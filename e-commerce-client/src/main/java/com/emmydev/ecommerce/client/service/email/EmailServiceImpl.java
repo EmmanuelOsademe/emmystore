@@ -1,5 +1,6 @@
-package com.emmydev.ecommerce.client.util;
+package com.emmydev.ecommerce.client.service.email;
 
+import com.emmydev.ecommerce.client.service.email.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -9,13 +10,12 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import javax.mail.SendFailedException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
 
 @Slf4j
 @Service
-public class EmailServiceImpl implements EmailService{
+public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private JavaMailSender mailSender;

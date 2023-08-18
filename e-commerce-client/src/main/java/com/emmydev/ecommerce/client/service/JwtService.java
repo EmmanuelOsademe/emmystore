@@ -16,7 +16,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private final String SECRET_KEY = "secret";
+    private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final String SECRET = "secret";
 
     public String extractUsername(String token){
         return extractClaim(token, Claims::getSubject);
@@ -32,9 +33,9 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token){
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(SECRET_KEY));
+        //SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(SECRET_KEY));
 
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody();
     }
 
     public String generateToken(UserDetails userDetails){
@@ -45,7 +46,7 @@ public class JwtService {
     private String createToken(Map<String, Object> claims, String subject){
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256).compact();
     }
 
     public boolean validateToken(String token, UserDetails userDetails){

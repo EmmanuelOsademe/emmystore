@@ -28,13 +28,13 @@ public interface UserService {
 
     PasswordResetToken resetPassword(String email) throws UserNotFoundException;
 
-     Optional<User> findUserByPasswordResetToken(PasswordResetToken passwordResetToken);
+     User findUserByPasswordResetToken(PasswordResetToken passwordResetToken) throws UserNotFoundException;
 
     PasswordResetToken validatePasswordResetToken(String token) throws TokenNotFoundException;
 
     void changePassword(User user, String newPassword);
 
-    String savePassword(String token, String password) throws TokenNotFoundException;
+    String savePassword(String token, String password) throws TokenNotFoundException, UserNotFoundException;
 
     User validateOldPassword(String email, String oldPassword) throws UserNotFoundException;
 

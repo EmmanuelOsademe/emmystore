@@ -1,4 +1,4 @@
-package com.emmydev.ecommerce.client.util;
+package com.emmydev.ecommerce.client.service.email;
 
 import javax.mail.MessagingException;
 

@@ -36,23 +36,30 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    @Autowired
     private UserRepository userRepository;
 
+    @Autowired
     private VerificationTokenRepository verificationTokenRepository;
 
+    @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
     private PasswordResetRepository passwordResetRepository;
 
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
     private JwtService jwtService;
 
 
@@ -69,14 +76,16 @@ public class UserServiceImpl implements UserService {
         user.setLastName(userModel.getLastName());
         user.setEmail(userModel.getEmail());
         user.setPassword(passwordEncoder.encode(userModel.getPassword()));
+        log.info(user.toString());
 
         List<Role> roleList = roleRepository.findAll();
+        log.info(String.valueOf(roleList.size()));
 
         if(roleList.size() == 0){
             Role admin = new Role();
             admin.setRole("ADMIN");
             roleRepository.save(admin);
-            user.isEnabled();
+            user.setEnabled(true);
             user.setRole(admin);
         }else{
             Optional<Role> role = roleRepository.findByRole("USER");
@@ -91,6 +100,7 @@ public class UserServiceImpl implements UserService {
         }
 
         userRepository.save(user);
+        log.info(user.toString());
 
         return user;
     }
@@ -163,7 +173,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = findUserByEmail(email);
 
         // Throw an error if the user does not exist;
-        if(!user.isPresent()){
+        if(user.isEmpty()){
             throw new UserNotFoundException("User does not exist");
         }
 
@@ -201,8 +211,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserByPasswordResetToken(PasswordResetToken passwordResetToken) {
-        return Optional.ofNullable(passwordResetToken.getUser());
+    public User findUserByPasswordResetToken(PasswordResetToken passwordResetToken) throws UserNotFoundException {
+        User user = passwordResetToken.getUser();
+        if(user == null){
+            throw new UserNotFoundException("User does not exist");
+        }
+
+        return user;
     }
 
     @Override
@@ -212,19 +227,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String savePassword(String token, String password) throws TokenNotFoundException {
+    public String savePassword(String token, String password) throws TokenNotFoundException, UserNotFoundException {
         // Validate the reset token
         PasswordResetToken passwordResetToken = validatePasswordResetToken(token);
 
         // Grab the user from the validated token
-        Optional<User> user = findUserByPasswordResetToken(passwordResetToken);
-
-        if(!user.isPresent()){
-            throw new TokenNotFoundException("Token could not be matched to a user");
-        }
+        User user = findUserByPasswordResetToken(passwordResetToken);
 
         // Change the password and save to repository
-        changePassword(user.get(), password);
+
+        user.setPassword(passwordEncoder.encode(password));
+
+        userRepository.save(user);
 
         return "Password saved successfully";
     }
@@ -262,11 +276,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseModel<Object> login(LoginModel loginDetails) {
+        log.info(loginDetails.toString());
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDetails.getEmail(), loginDetails.getPassword()));
 
+        log.info("Authentication manager done");
         UserDetails user = userDetailsService.loadUserByUsername(loginDetails.getEmail());
+        log.info(user.toString());
 
         String jwtToken = jwtService.generateToken(user);
+        log.info(jwtToken);
 
         return ResponseModel.builder()
                 .responseCode(ResponseCodes.SUCCESS)

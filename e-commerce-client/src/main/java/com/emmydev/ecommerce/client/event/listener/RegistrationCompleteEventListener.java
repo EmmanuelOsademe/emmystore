@@ -3,7 +3,7 @@ package com.emmydev.ecommerce.client.event.listener;
 import com.emmydev.ecommerce.client.entity.User;
 import com.emmydev.ecommerce.client.event.RegistrationCompleteEvent;
 import com.emmydev.ecommerce.client.service.user.UserService;
-import com.emmydev.ecommerce.client.util.EmailService;
+import com.emmydev.ecommerce.client.service.email.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -31,10 +31,18 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
 
         // Send a registration notification mail to the User
         String url = event.getApplicationUrl() + "/verifyRegistration?token=" + token;
-        String messageBody = "Dear " + user.getFirstName() +"\n\nThank you for registration at EmmysDev. \n\nClick this link to verify your account: " + url;
 
-        log.info("Click the link to verify your account: {}", url);
-        emailService.sendSimpleMessage("emmyshoppinghub@gmail.com", user.getEmail(), "Complete your registration", messageBody);
-        //log.info("Click the link to verify your account: {}", url);
+        // Message body and message header;
+        String messageBody;
+        String messageHeader;
+        if(user.getRole().getRole() == "ADMIN"){
+            messageBody = "Dear " + user.getFirstName() + ",\n\nYour account has been successfully registered with admin privilege";
+            messageHeader = "Registration Complete";
+        }else{
+            messageBody = "Dear " + user.getFirstName() +"\n\nThank you for registration at EmmysDev. \n\nClick this link to verify your account: " + url;
+            messageHeader = "Complete your registration";
+        }
+
+        emailService.sendSimpleMessage("emmyshoppinghub@gmail.com", user.getEmail(), messageHeader, messageBody);
     }
 }

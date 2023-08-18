@@ -103,6 +103,7 @@ public class ErrorHandlingControllerAdvice  {
     public ValidationErrorResponse onRuntimeException(RuntimeException ex){
         ValidationErrorResponse errorResponse = new ValidationErrorResponse();
         errorResponse.getViolations().add(new Violation("Runtime error", ex.getMessage()));
+        log.error(ex.getMessage());
         log.error(ex.toString());
         return errorResponse;
     }

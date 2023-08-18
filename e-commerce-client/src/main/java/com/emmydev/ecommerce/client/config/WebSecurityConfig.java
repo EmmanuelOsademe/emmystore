@@ -32,12 +32,12 @@ public class WebSecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private static final String[] WHITE_LIST_URLs = {
-            "/hello",
             "/register",
             "/verifyRegistration",
             "/resendVerificationToken",
             "/resetPassword",
-            "/savePassword"
+            "/savePassword",
+            "/login"
     };
 
     @Bean
@@ -53,8 +53,8 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated()
                 .and()
                 .cors()
-                .and().
-                sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
