@@ -33,10 +33,10 @@ public class WebSecurityConfig {
 
     private static final String[] WHITE_LIST_URLs = {
             "/user",
-            "/verifyRegistration",
-            "/resendVerificationToken",
-            "/resetPassword",
-            "/savePassword",
+            "/new-user-verify",
+            "/new-verification-token",
+            "/password-reset-token",
+            "/new-password-save",
             "/login"
     };
 

@@ -54,7 +54,7 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponseDto onNoSuchObjectException(HttpMessageNotReadableException ex){
+    public ValidationErrorResponseDto onHttpMessageNotReadableException(HttpMessageNotReadableException ex){
 
         ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
         errorResponse.getViolationDtos().add(new ViolationDto(ex.getClass().getPackage().getClass().getName(), "Missing required fields"));
@@ -81,6 +81,17 @@ public class ErrorHandlingControllerAdvice  {
     public ValidationErrorResponseDto onUserNotFoundException(UserNotFoundException ex){
         ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
         errorResponse.getViolationDtos().add(new ViolationDto("Email", ex.getMessage()));
+
+        log.error(errorResponse.toString());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(ProductAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ValidationErrorResponseDto onProductAlreadyExistsException(ProductAlreadyExistsException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Product name", ex.getMessage()));
 
         log.error(errorResponse.toString());
         return errorResponse;
