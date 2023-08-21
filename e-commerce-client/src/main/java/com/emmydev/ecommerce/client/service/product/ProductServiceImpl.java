@@ -1,5 +1,6 @@
 package com.emmydev.ecommerce.client.service.product;
 
+import com.emmydev.ecommerce.client.config.DefaultProperties;
 import com.emmydev.ecommerce.client.dto.ProductDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
 import com.emmydev.ecommerce.client.entity.Product;
@@ -9,8 +10,10 @@ import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import com.emmydev.ecommerce.client.exception.ProductAlreadyExistsException;
 import com.emmydev.ecommerce.client.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +23,9 @@ public class ProductServiceImpl implements ProductService{
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private DefaultProperties defaultProperties;
 
     @Override
     public ResponseDto<Object> saveProduct(ProductDto[] productDtos) throws ProductAlreadyExistsException {
@@ -43,6 +49,22 @@ public class ProductServiceImpl implements ProductService{
     public Optional<Product> findProductByName(String productName) {
         Optional<Product> dbProduct = productRepository.findByName(productName);
         return dbProduct;
+    }
+
+    @Override
+    public ResponseDto<Object> fetchProducts(int pageNumber) {
+
+        int productsPerPages = defaultProperties.getProductsPerPage();
+
+        Pageable productsPages = (Pageable) PageRequest.of(pageNumber, productsPerPages);
+
+        List<Product> products = productRepository.findAllProducts(productsPages);
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Products successfully fetch")
+                .data(products)
+                .build();
     }
 
     private List<Product> processNewProducts(ProductDto[] productDtos) throws ProductAlreadyExistsException {
