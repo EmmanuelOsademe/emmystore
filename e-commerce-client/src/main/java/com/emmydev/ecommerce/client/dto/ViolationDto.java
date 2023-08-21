@@ -1,11 +1,11 @@
-package com.emmydev.ecommerce.client.model;
+package com.emmydev.ecommerce.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Violation {
+public class ViolationDto {
 
     private String fieldName;
 

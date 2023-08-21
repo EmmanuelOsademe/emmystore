@@ -6,15 +6,15 @@ import com.emmydev.ecommerce.client.entity.VerificationToken;
 import com.emmydev.ecommerce.client.exception.UserAlreadyExistsException;
 import com.emmydev.ecommerce.client.exception.UserNotFoundException;
 import com.emmydev.ecommerce.client.exception.TokenNotFoundException;
-import com.emmydev.ecommerce.client.model.LoginModel;
-import com.emmydev.ecommerce.client.model.PasswordModel;
-import com.emmydev.ecommerce.client.model.ResponseModel;
-import com.emmydev.ecommerce.client.model.UserModel;
+import com.emmydev.ecommerce.client.dto.LoginDto;
+import com.emmydev.ecommerce.client.dto.PasswordDto;
+import com.emmydev.ecommerce.client.dto.ResponseDto;
+import com.emmydev.ecommerce.client.dto.UserDto;
 
 import java.util.Optional;
 
 public interface UserService {
-    User registerUser(UserModel userModel) throws UserAlreadyExistsException;
+    User registerUser(UserDto userDto) throws UserAlreadyExistsException;
 
     Optional<User> findUserByEmail(String email);
 
@@ -38,7 +38,7 @@ public interface UserService {
 
     User validateOldPassword(String email, String oldPassword) throws UserNotFoundException;
 
-    String updatePassword(PasswordModel passwordModel) throws UserNotFoundException;
+    String updatePassword(PasswordDto passwordDto) throws UserNotFoundException;
 
-    ResponseModel<Object> login(LoginModel loginDetails);
+    ResponseDto<Object> login(LoginDto loginDetails);
 }

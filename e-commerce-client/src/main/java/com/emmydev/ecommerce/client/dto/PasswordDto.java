@@ -1,4 +1,4 @@
-package com.emmydev.ecommerce.client.model;
+package com.emmydev.ecommerce.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PasswordModel {
+public class PasswordDto {
 
     private String email;
 

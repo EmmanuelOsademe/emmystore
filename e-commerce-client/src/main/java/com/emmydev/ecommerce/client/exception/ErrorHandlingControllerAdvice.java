@@ -1,7 +1,7 @@
 package com.emmydev.ecommerce.client.exception;
 
-import com.emmydev.ecommerce.client.model.ValidationErrorResponse;
-import com.emmydev.ecommerce.client.model.Violation;
+import com.emmydev.ecommerce.client.dto.ValidationErrorResponseDto;
+import com.emmydev.ecommerce.client.dto.ViolationDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,11 +22,11 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponse onConstrainValidationException(ConstraintViolationException ex){
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
+    public ValidationErrorResponseDto onConstrainValidationException(ConstraintViolationException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
 
         for(ConstraintViolation violation: ex.getConstraintViolations()){
-            errorResponse.getViolations().add(new Violation(violation.getPropertyPath().toString(), violation.getMessage()));
+            errorResponse.getViolationDtos().add(new ViolationDto(violation.getPropertyPath().toString(), violation.getMessage()));
         }
 
         return errorResponse;
@@ -35,16 +35,16 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ResponseBody
-    public ValidationErrorResponse onMethodArgumentNotValidException(MethodArgumentNotValidException ex){
+    public ValidationErrorResponseDto onMethodArgumentNotValidException(MethodArgumentNotValidException ex){
 
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
 
         for(FieldError fieldError: ex.getBindingResult().getFieldErrors()){
-            errorResponse.getViolations().add(new Violation(fieldError.getField(), fieldError.getDefaultMessage()));
+            errorResponse.getViolationDtos().add(new ViolationDto(fieldError.getField(), fieldError.getDefaultMessage()));
         }
 
         if(ex.hasGlobalErrors()){
-            errorResponse.getViolations().add(new Violation(ex.getGlobalError().getObjectName(), ex.getGlobalError().getDefaultMessage()));
+            errorResponse.getViolationDtos().add(new ViolationDto(ex.getGlobalError().getObjectName(), ex.getGlobalError().getDefaultMessage()));
         }
 
         log.info(errorResponse.toString());
@@ -54,10 +54,10 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponse onNoSuchObjectException(HttpMessageNotReadableException ex){
+    public ValidationErrorResponseDto onNoSuchObjectException(HttpMessageNotReadableException ex){
 
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
-        errorResponse.getViolations().add(new Violation(ex.getClass().getPackage().getClass().getName(), "Missing required fields"));
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto(ex.getClass().getPackage().getClass().getName(), "Missing required fields"));
 
         log.info(errorResponse.toString());
         return errorResponse;
@@ -66,10 +66,10 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(UserAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponse onUserAlreadyExistsException(UserAlreadyExistsException ex){
+    public ValidationErrorResponseDto onUserAlreadyExistsException(UserAlreadyExistsException ex){
 
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
-        errorResponse.getViolations().add(new Violation("Email", ex.getMessage()));
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Email", ex.getMessage()));
 
         log.info(errorResponse.toString());
         return errorResponse;
@@ -78,9 +78,9 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponse onUserNotFoundException(UserNotFoundException ex){
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
-        errorResponse.getViolations().add(new Violation("Email", ex.getMessage()));
+    public ValidationErrorResponseDto onUserNotFoundException(UserNotFoundException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Email", ex.getMessage()));
 
         log.error(errorResponse.toString());
         return errorResponse;
@@ -89,9 +89,9 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(TokenNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponse onTokenNotFoundException(TokenNotFoundException ex){
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
-        errorResponse.getViolations().add(new Violation("VerificationToken", ex.getMessage()));
+    public ValidationErrorResponseDto onTokenNotFoundException(TokenNotFoundException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("VerificationToken", ex.getMessage()));
 
         log.info(errorResponse.toString());
         return errorResponse;
@@ -100,9 +100,9 @@ public class ErrorHandlingControllerAdvice  {
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public ValidationErrorResponse onRuntimeException(RuntimeException ex){
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
-        errorResponse.getViolations().add(new Violation("Runtime error", ex.getMessage()));
+    public ValidationErrorResponseDto onRuntimeException(RuntimeException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Runtime error", ex.getMessage()));
         log.error(ex.getMessage());
         log.error(ex.toString());
         return errorResponse;

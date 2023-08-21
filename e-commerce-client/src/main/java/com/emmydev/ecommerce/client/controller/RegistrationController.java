@@ -7,10 +7,10 @@ import com.emmydev.ecommerce.client.event.RegistrationCompleteEvent;
 import com.emmydev.ecommerce.client.exception.UserAlreadyExistsException;
 import com.emmydev.ecommerce.client.exception.UserNotFoundException;
 import com.emmydev.ecommerce.client.exception.TokenNotFoundException;
-import com.emmydev.ecommerce.client.model.LoginModel;
-import com.emmydev.ecommerce.client.model.PasswordModel;
-import com.emmydev.ecommerce.client.model.ResponseModel;
-import com.emmydev.ecommerce.client.model.UserModel;
+import com.emmydev.ecommerce.client.dto.LoginDto;
+import com.emmydev.ecommerce.client.dto.PasswordDto;
+import com.emmydev.ecommerce.client.dto.ResponseDto;
+import com.emmydev.ecommerce.client.dto.UserDto;
 import com.emmydev.ecommerce.client.service.user.UserService;
 import com.emmydev.ecommerce.client.service.email.EmailService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +34,9 @@ public class RegistrationController {
     @Autowired
     private ApplicationEventPublisher publisher;
 
-    @PostMapping("/register")
-    public String registerUser(@Valid @RequestBody UserModel userModel, final HttpServletRequest request) throws UserAlreadyExistsException {
-        User user = userService.registerUser(userModel);
+    @PostMapping("/user")
+    public String registerUser(@Valid @RequestBody UserDto userDto, final HttpServletRequest request) throws UserAlreadyExistsException {
+        User user = userService.registerUser(userDto);
 
         log.info(user.toString());
         publisher.publishEvent(new RegistrationCompleteEvent(user, getApplicationUrl(request)));
@@ -47,7 +47,7 @@ public class RegistrationController {
         return "Your account has been registered.\nPlease check your mail to verify your account";
     }
 
-    @GetMapping("/verifyRegistration")
+    @GetMapping("new-user-verify")
     public String verifyRegistration(@RequestParam("token") String token){
         boolean isVerified = userService.validateRegistrationToken(token);
         if(isVerified){
@@ -57,7 +57,7 @@ public class RegistrationController {
         return "Your account could not be verified";
     }
 
-    @GetMapping("/resendVerificationToken")
+    @GetMapping("new-verification-token")
     public String resendVerificationToken(@RequestParam("token") String token, final HttpServletRequest request) throws TokenNotFoundException {
         //Receive the verificationToken form the userService
         VerificationToken verificationToken = userService.generateNewVerificationToken(token);
@@ -71,10 +71,10 @@ public class RegistrationController {
         return "A reverification link has been sent to your email. Please check your email to verify your account";
     }
 
-    @PostMapping("/resetPassword")
-    public String resetPassword(@RequestBody PasswordModel passwordModel, final HttpServletRequest request) throws UserNotFoundException {
+    @PostMapping("password-reset-token")
+    public String resetPassword(@RequestBody PasswordDto passwordDto, final HttpServletRequest request) throws UserNotFoundException {
         // Get the password token from the resetPassword service
-        PasswordResetToken passwordResetToken = userService.resetPassword(passwordModel.getEmail());
+        PasswordResetToken passwordResetToken = userService.resetPassword(passwordDto.getEmail());
 
         // Get the application url from the request
         String applicationUrl = getApplicationUrl(request);
@@ -85,22 +85,22 @@ public class RegistrationController {
         return "A password reset link has been sent to your mail. Please check your mail and reset your password";
     }
 
-    @PostMapping("/savePassword")
+    @PostMapping("new-password-save")
     public String savePassword(@RequestParam("token") String resetToken, @RequestBody String password) throws TokenNotFoundException, UserNotFoundException {
         // Get the message from the savePassword service
         String successMessage = userService.savePassword(resetToken, password);
         return successMessage;
     }
 
-    @PostMapping("/updatePassword")
-    public String updatePassword(@RequestBody PasswordModel passwordModel) throws UserNotFoundException {
+    @PostMapping("new-password-update")
+    public String updatePassword(@RequestBody PasswordDto passwordDto) throws UserNotFoundException {
         // Get message from the updatePassword service
-        String successMessage = userService.updatePassword(passwordModel);
+        String successMessage = userService.updatePassword(passwordDto);
         return successMessage;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseModel<Object>> login(@Valid @RequestBody LoginModel loginData){
+    public ResponseEntity<ResponseDto<Object>> login(@Valid @RequestBody LoginDto loginData){
         return ResponseEntity.ok(userService.login(loginData));
     }
 

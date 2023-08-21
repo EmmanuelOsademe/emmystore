@@ -32,7 +32,7 @@ public class WebSecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private static final String[] WHITE_LIST_URLs = {
-            "/register",
+            "/user",
             "/verifyRegistration",
             "/resendVerificationToken",
             "/resetPassword",

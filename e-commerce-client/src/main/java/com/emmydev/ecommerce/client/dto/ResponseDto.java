@@ -1,4 +1,4 @@
-package com.emmydev.ecommerce.client.model;
+package com.emmydev.ecommerce.client.dto;
 
 import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseModel<T> {
+public class ResponseDto<T> {
 
     private ResponseCodes responseCode;
 

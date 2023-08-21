@@ -8,24 +8,21 @@ import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import com.emmydev.ecommerce.client.exception.UserAlreadyExistsException;
 import com.emmydev.ecommerce.client.exception.UserNotFoundException;
 import com.emmydev.ecommerce.client.exception.TokenNotFoundException;
-import com.emmydev.ecommerce.client.model.LoginModel;
-import com.emmydev.ecommerce.client.model.PasswordModel;
-import com.emmydev.ecommerce.client.model.ResponseModel;
-import com.emmydev.ecommerce.client.model.UserModel;
+import com.emmydev.ecommerce.client.dto.LoginDto;
+import com.emmydev.ecommerce.client.dto.PasswordDto;
+import com.emmydev.ecommerce.client.dto.ResponseDto;
+import com.emmydev.ecommerce.client.dto.UserDto;
 import com.emmydev.ecommerce.client.repository.PasswordResetRepository;
 import com.emmydev.ecommerce.client.repository.RoleRepository;
 import com.emmydev.ecommerce.client.repository.UserRepository;
 import com.emmydev.ecommerce.client.repository.VerificationTokenRepository;
 import com.emmydev.ecommerce.client.service.JwtService;
 import com.emmydev.ecommerce.client.service.UserDetailsServiceImpl;
-import com.emmydev.ecommerce.client.service.user.UserService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,18 +61,18 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User registerUser(UserModel userModel) throws UserAlreadyExistsException {
+    public User registerUser(UserDto userDto) throws UserAlreadyExistsException {
 
-        Optional<User> dbUser = findUserByEmail(userModel.getEmail());
+        Optional<User> dbUser = findUserByEmail(userDto.getEmail());
         if(dbUser.isPresent()){
-            throw new UserAlreadyExistsException("User with " + userModel.getEmail() + " already exists");
+            throw new UserAlreadyExistsException("User with " + userDto.getEmail() + " already exists");
         }
 
         User user = new User();
-        user.setFirstName(userModel.getFirstName());
-        user.setLastName(userModel.getLastName());
-        user.setEmail(userModel.getEmail());
-        user.setPassword(passwordEncoder.encode(userModel.getPassword()));
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         log.info(user.toString());
 
         List<Role> roleList = roleRepository.findAll();
@@ -264,18 +261,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updatePassword(PasswordModel passwordModel) throws UserNotFoundException {
+    public String updatePassword(PasswordDto passwordDto) throws UserNotFoundException {
         // Validate old password and get the user from the validate password;
-        User user = validateOldPassword(passwordModel.getEmail(), passwordModel.getOldPassword());
+        User user = validateOldPassword(passwordDto.getEmail(), passwordDto.getOldPassword());
 
         // Save the new password;
-        changePassword(user, passwordModel.getNewPassword());
+        changePassword(user, passwordDto.getNewPassword());
 
         return "Password successfully updated";
     }
 
     @Override
-    public ResponseModel<Object> login(LoginModel loginDetails) {
+    public ResponseDto<Object> login(LoginDto loginDetails) {
         log.info(loginDetails.toString());
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDetails.getEmail(), loginDetails.getPassword()));
@@ -287,7 +284,7 @@ public class UserServiceImpl implements UserService {
         String jwtToken = jwtService.generateToken(user);
         log.info(jwtToken);
 
-        return ResponseModel.builder()
+        return ResponseDto.builder()
                 .responseCode(ResponseCodes.SUCCESS)
                 .message("You have successfully logged in")
                 .data(jwtToken)

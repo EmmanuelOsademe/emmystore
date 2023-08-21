@@ -1,14 +1,16 @@
-package com.emmydev.ecommerce.client.model;
+package com.emmydev.ecommerce.client.dto;
 
 import com.emmydev.ecommerce.client.validation.PasswordMatches;
 import com.emmydev.ecommerce.client.validation.ValidEmail;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 @Data
 @PasswordMatches
-public class UserModel {
+@Builder
+public class UserDto {
 
     @NotBlank(message = "First name cannot be blank")
     private String firstName;
