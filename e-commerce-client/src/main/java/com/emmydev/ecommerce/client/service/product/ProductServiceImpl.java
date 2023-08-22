@@ -3,6 +3,7 @@ package com.emmydev.ecommerce.client.service.product;
 import com.emmydev.ecommerce.client.config.DefaultProperties;
 import com.emmydev.ecommerce.client.dto.PageRequestDto;
 import com.emmydev.ecommerce.client.dto.ProductDto;
+import com.emmydev.ecommerce.client.dto.ProductUpdateDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
 import com.emmydev.ecommerce.client.entity.Product;
 import com.emmydev.ecommerce.client.enums.Manufacturer;
@@ -20,9 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -51,6 +50,20 @@ public class ProductServiceImpl implements ProductService{
                 .data(products)
                 .build();
     }
+
+    @Override
+    public ResponseDto<Object> updateProducts(ProductUpdateDto[] productUpdateDtos) {
+        // Return products to save and products to reject
+        Map<String, Object> result = processUpdateData(productUpdateDtos);
+
+        // Return response DTO
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Products successfully created")
+                .data(result)
+                .build();
+    }
+
 
     @Override
     public Optional<Product> findProductByName(String productName) {
@@ -151,6 +164,48 @@ public class ProductServiceImpl implements ProductService{
             throw new ProductAlreadyExistsException(existingProducts.toString());
         }
         return processedProducts;
+    }
+
+    private Map<String, Object> processUpdateData(ProductUpdateDto[] productUpdateDtos) {
+        // Store already existing products
+        List<Product> existingProducts = new ArrayList<>();
+
+        // Store nonexistent products
+        List<ProductUpdateDto> nonExistentProducts = new ArrayList<>();
+
+        for(ProductUpdateDto productUpdateDto: productUpdateDtos){
+            Optional<Product> product = productRepository.findById(productUpdateDto.getId());
+            if(product.isPresent()){
+                Product dbProduct = product.get();
+
+                // Update the data.
+                dbProduct.setName(Objects.nonNull(productUpdateDto.getName()) ? productUpdateDto.getName() : dbProduct.getName());
+                dbProduct.setDescription(Objects.nonNull(productUpdateDto.getDescription()) ? productUpdateDto.getDescription() : dbProduct.getDescription());
+                dbProduct.setPrice(Objects.nonNull(productUpdateDto.getPrice()) ? productUpdateDto.getPrice() : dbProduct.getPrice());
+                dbProduct.setImage(Objects.nonNull(productUpdateDto.getImage()) ? productUpdateDto.getImage() : dbProduct.getImage());
+                dbProduct.setDiscountRate(Objects.nonNull(productUpdateDto.getDiscountRate()) ? productUpdateDto.getDiscountRate() : dbProduct.getDiscountRate());
+                dbProduct.setAvailableQuantity(Objects.nonNull(productUpdateDto.getAvailableQuantity()) ?
+                        (productUpdateDto.getAvailableQuantity() + dbProduct.getAvailableQuantity()) : dbProduct.getAvailableQuantity());
+                dbProduct.setMinimumQuantity(Objects.nonNull(productUpdateDto.getMinimumQuantity()) ? productUpdateDto.getMinimumQuantity() : dbProduct.getMinimumQuantity());
+                dbProduct.setProductCategory(Objects.nonNull(productUpdateDto.getProductCategory()) ? matchCategory(productUpdateDto.getProductCategory()) : dbProduct.getProductCategory());
+                dbProduct.setManufacturer(Objects.nonNull(productUpdateDto.getManufacturer()) ? matchManufacturer(productUpdateDto.getManufacturer()) : dbProduct.getManufacturer());
+                dbProduct.setFeatured(Objects.nonNull(productUpdateDto.isFeatured()) ? productUpdateDto.isFeatured() : dbProduct.isFeatured());
+                dbProduct.setFreeShipping(Objects.nonNull(productUpdateDto.isFreeShipping()) ? productUpdateDto.isFreeShipping() : dbProduct.isFreeShipping());
+                dbProduct.setStoreLocation(Objects.nonNull(productUpdateDto.getStoreLocation()) ? productUpdateDto.getStoreLocation() : dbProduct.getStoreLocation());
+
+                existingProducts.add(dbProduct);
+            }else{
+                nonExistentProducts.add(productUpdateDto);
+            }
+        }
+
+        productRepository.saveAll(existingProducts);
+
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("savedProducts", existingProducts);
+        result.put("rejectedProducts", nonExistentProducts);
+
+        return result;
     }
 
     private Manufacturer matchManufacturer(String productManufacturer) {

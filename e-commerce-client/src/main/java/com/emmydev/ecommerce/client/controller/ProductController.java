@@ -2,6 +2,7 @@ package com.emmydev.ecommerce.client.controller;
 
 import com.emmydev.ecommerce.client.dto.PageRequestDto;
 import com.emmydev.ecommerce.client.dto.ProductDto;
+import com.emmydev.ecommerce.client.dto.ProductUpdateDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
 import com.emmydev.ecommerce.client.exception.ProductAlreadyExistsException;
 import com.emmydev.ecommerce.client.service.product.ProductService;
@@ -24,6 +25,12 @@ public class ProductController {
     @PostMapping("new-products")
     public ResponseEntity<ResponseDto<Object>> saveProducts(@Valid @RequestBody ProductDto[] products) throws ProductAlreadyExistsException {
         return ResponseEntity.ok(productService.saveProduct(products));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping()
+    public ResponseEntity<ResponseDto<Object>> updateProducts(@RequestBody ProductUpdateDto[] products){
+        return ResponseEntity.ok(productService.updateProducts(products));
     }
 
     @PostMapping("products")

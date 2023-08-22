@@ -2,6 +2,7 @@ package com.emmydev.ecommerce.client.service.product;
 
 import com.emmydev.ecommerce.client.dto.PageRequestDto;
 import com.emmydev.ecommerce.client.dto.ProductDto;
+import com.emmydev.ecommerce.client.dto.ProductUpdateDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
 import com.emmydev.ecommerce.client.entity.Product;
 import com.emmydev.ecommerce.client.exception.ProductAlreadyExistsException;
@@ -20,4 +21,5 @@ public interface ProductService {
 
     ResponseDto<Object> fetchProductsByCategory(String category, PageRequestDto pageRequestDto);
 
+    ResponseDto<Object> updateProducts(ProductUpdateDto[] productUpdateDtos);
 }

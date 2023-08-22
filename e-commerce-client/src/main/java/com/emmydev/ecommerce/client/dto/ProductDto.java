@@ -22,7 +22,6 @@ public class ProductDto {
     private String description;
 
     @NotBlank(message = "Product price cannot be empty")
-    @Min(0)
     private double price;
 
     @NotBlank(message = "Product image cannot be empty")
@@ -34,7 +33,6 @@ public class ProductDto {
     private double discountRate;
 
     @NotBlank(message = "Available quantity cannot be empty")
-    @Min(1)
     private int availableQuantity;
 
     @NotBlank(message = "Minimum quantity cannot be empty")
