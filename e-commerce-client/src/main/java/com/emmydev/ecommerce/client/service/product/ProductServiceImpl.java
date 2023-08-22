@@ -1,6 +1,7 @@
 package com.emmydev.ecommerce.client.service.product;
 
 import com.emmydev.ecommerce.client.config.DefaultProperties;
+import com.emmydev.ecommerce.client.dto.PageRequestDto;
 import com.emmydev.ecommerce.client.dto.ProductDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
 import com.emmydev.ecommerce.client.entity.Product;
@@ -9,16 +10,22 @@ import com.emmydev.ecommerce.client.enums.ProductCategory;
 import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import com.emmydev.ecommerce.client.exception.ProductAlreadyExistsException;
 import com.emmydev.ecommerce.client.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PagedListHolder;
+import org.springframework.beans.support.PropertyComparator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class ProductServiceImpl implements ProductService{
 
     @Autowired
@@ -52,13 +59,52 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ResponseDto<Object> fetchProducts(int pageNumber) {
+    public ResponseDto<Object> fetchProducts(PageRequestDto pageRequestDto) {
 
-        int productsPerPages = defaultProperties.getProductsPerPage();
+        Pageable pageable = new  PageRequestDto().getPageable(pageRequestDto);
 
-        Pageable productsPages = (Pageable) PageRequest.of(pageNumber, productsPerPages);
+        Page<Product> products = productRepository.findAll(pageable);
 
-        List<Product> products = productRepository.findAllProducts(productsPages);
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Products successfully fetch")
+                .data(products)
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> fetchProductsPageList(PageRequestDto pageRequestDto) {
+
+        List<Product> productList = productRepository.findAll();
+
+        // 1. PageListHolder
+        PagedListHolder<Product> productPagedListHolder = new PagedListHolder<>(productList);
+        productPagedListHolder.setPage(pageRequestDto.getPageNumber());
+        productPagedListHolder.setPageSize(pageRequestDto.getPageSize());
+
+        // 2. PropertyComparator
+        List<Product> pageSlice = productPagedListHolder.getPageList();
+        boolean ascending = pageRequestDto.getSort().isAscending();
+        PropertyComparator.sort(pageSlice, new MutableSortDefinition(pageRequestDto.getSortBy(), true, ascending));
+
+        // 3. Page Implementation
+        Page<Product> products = new PageImpl<Product>(pageSlice, new PageRequestDto().getPageable(pageRequestDto), productList.size());
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Products successfully fetch")
+                .data(products)
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> fetchProductsByCategory(String category, PageRequestDto pageRequestDto) {
+        // Create pageable
+        Pageable pageable = new  PageRequestDto().getPageable(pageRequestDto);
+        log.info(category);
+
+        // Make the query
+        Page<Product> products = productRepository.findByProductCategory(matchCategory(category), pageable);
 
         return ResponseDto.builder()
                 .responseCode(ResponseCodes.SUCCESS)

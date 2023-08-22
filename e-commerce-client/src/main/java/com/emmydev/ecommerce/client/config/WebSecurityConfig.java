@@ -38,7 +38,10 @@ public class WebSecurityConfig {
             "/password-reset-token",
             "/new-password-save",
             "/login",
-            "products/product/*"
+            "/product/products",
+            "/product/list",
+            "/product/category/*",
+            "/product/manufacturer/*"
     };
 
     @Bean

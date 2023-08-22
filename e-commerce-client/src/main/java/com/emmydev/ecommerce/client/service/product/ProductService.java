@@ -1,12 +1,11 @@
 package com.emmydev.ecommerce.client.service.product;
 
+import com.emmydev.ecommerce.client.dto.PageRequestDto;
 import com.emmydev.ecommerce.client.dto.ProductDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
 import com.emmydev.ecommerce.client.entity.Product;
 import com.emmydev.ecommerce.client.exception.ProductAlreadyExistsException;
-import org.springframework.data.domain.Page;
 
-import java.awt.print.Pageable;
 import java.util.Optional;
 
 public interface ProductService {
@@ -15,5 +14,10 @@ public interface ProductService {
 
     Optional<Product> findProductByName(String productName);
 
-    ResponseDto<Object> fetchProducts(int pageNumber);
+    ResponseDto<Object> fetchProducts(PageRequestDto pageRequestDto);
+
+    ResponseDto<Object> fetchProductsPageList(PageRequestDto pageRequestDto);
+
+    ResponseDto<Object> fetchProductsByCategory(String category, PageRequestDto pageRequestDto);
+
 }

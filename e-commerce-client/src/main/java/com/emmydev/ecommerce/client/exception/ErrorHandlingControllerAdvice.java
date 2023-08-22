@@ -55,6 +55,7 @@ public class ErrorHandlingControllerAdvice  {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ValidationErrorResponseDto onHttpMessageNotReadableException(HttpMessageNotReadableException ex){
+        log.info(ex.toString());
 
         ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
         errorResponse.getViolationDtos().add(new ViolationDto(ex.getClass().getPackage().getClass().getName(), "Missing required fields"));
