@@ -23,12 +23,12 @@ public class ProductController {
     private ProductService productService;
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("new-products")
-    public ResponseEntity<ResponseDto<Object>> saveProducts(@Valid @RequestBody ProductDto[] products) throws ProductAlreadyExistsException {
+    public ResponseEntity<ResponseDto<Object>> saveProducts(@Valid @RequestBody ProductDto[] products) {
         return ResponseEntity.ok(productService.saveProduct(products));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping()
+    @PutMapping("/updated-product")
     public ResponseEntity<ResponseDto<Object>> updateProducts(@RequestBody ProductUpdateDto[] products){
         return ResponseEntity.ok(productService.updateProducts(products));
     }

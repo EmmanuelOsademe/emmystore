@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface ProductService {
 
-    ResponseDto<Object> saveProduct(ProductDto[] productDto) throws ProductAlreadyExistsException;
+    ResponseDto<Object> saveProduct(ProductDto[] productDto);
 
     Optional<Product> findProductByName(String productName);
 

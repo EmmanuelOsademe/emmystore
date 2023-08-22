@@ -34,20 +34,15 @@ public class ProductServiceImpl implements ProductService{
     private DefaultProperties defaultProperties;
 
     @Override
-    public ResponseDto<Object> saveProduct(ProductDto[] productDtos) throws ProductAlreadyExistsException {
+    public ResponseDto<Object> saveProduct(ProductDto[] productDtos){
         // Sanitise the data to be sure there are no duplicates
-        List<Product> products = processNewProducts(productDtos);
-
-        // Save sanitised data
-        for(Product product: products){
-            productRepository.save(product);
-        }
+        Map<String, Object> result = processNewProducts(productDtos);
 
         // Return response DTO
         return ResponseDto.builder()
                 .responseCode(ResponseCodes.SUCCESS)
                 .message("Products successfully created")
-                .data(products)
+                .data(result)
                 .build();
     }
 
@@ -59,7 +54,7 @@ public class ProductServiceImpl implements ProductService{
         // Return response DTO
         return ResponseDto.builder()
                 .responseCode(ResponseCodes.SUCCESS)
-                .message("Products successfully created")
+                .message("Products successfully updated")
                 .data(result)
                 .build();
     }
@@ -126,7 +121,7 @@ public class ProductServiceImpl implements ProductService{
                 .build();
     }
 
-    private List<Product> processNewProducts(ProductDto[] productDtos) throws ProductAlreadyExistsException {
+    private Map<String, Object> processNewProducts(ProductDto[] productDtos){
         // Store valid products
         List<Product> processedProducts = new ArrayList<>();
 
@@ -159,11 +154,13 @@ public class ProductServiceImpl implements ProductService{
             }
         }
 
-        // Throw an error if one of the products already exist
-        if(existingProducts.size() != 0){
-            throw new ProductAlreadyExistsException(existingProducts.toString());
-        }
-        return processedProducts;
+        productRepository.saveAll(processedProducts);
+
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("createdProducts", processedProducts);
+        result.put("rejectedProducts", existingProducts);
+
+        return result;
     }
 
     private Map<String, Object> processUpdateData(ProductUpdateDto[] productUpdateDtos) {
