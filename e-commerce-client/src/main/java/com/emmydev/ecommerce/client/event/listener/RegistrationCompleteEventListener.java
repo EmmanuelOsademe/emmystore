@@ -30,7 +30,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         userService.saveVerificationToken(token, user);
 
         // Send a registration notification mail to the User
-        String url = event.getApplicationUrl() + "/verifyRegistration?token=" + token;
+        String url = event.getApplicationUrl() + "/new-user-verify?token=" + token;
 
         // Message body and message header;
         String messageBody;

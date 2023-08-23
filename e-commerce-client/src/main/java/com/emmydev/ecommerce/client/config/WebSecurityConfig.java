@@ -41,7 +41,8 @@ public class WebSecurityConfig {
             "/product/products",
             "/product/list",
             "/product/category/*",
-            "/product/manufacturer/*"
+            "/product/manufacturer/*",
+            "/product/*"
     };
 
     @Bean

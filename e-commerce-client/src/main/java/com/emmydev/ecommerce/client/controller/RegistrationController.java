@@ -38,7 +38,6 @@ public class RegistrationController {
     public String registerUser(@Valid @RequestBody UserDto userDto, final HttpServletRequest request) throws UserAlreadyExistsException {
         User user = userService.registerUser(userDto);
 
-        log.info(user.toString());
         publisher.publishEvent(new RegistrationCompleteEvent(user, getApplicationUrl(request)));
 
         if(user.getRole().getRole() == "ADMIN"){

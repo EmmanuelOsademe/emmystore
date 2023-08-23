@@ -15,9 +15,15 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository <Product, Long> {
 
-    Optional<Product> findByName(String productName);
+    Optional<Product> findByNameIgnoreCase(String productName);
 
     Optional<Product> findById(Long id);
 
     Page<Product> findByProductCategory(ProductCategory category, Pageable pageable);
+
+    // exists by Id
+    // CrudRepository, ListCrudRepository, PagingAndSortingRepository
+    // List<Person> findByLastnameAndFirstnameAllIgnoreCase(String lastname, String firstname);
+    //Streamable<Person> result = repository.findByFirstnameContaining("av").and(repository.findByLastnameContaining("ea"));
+
 }

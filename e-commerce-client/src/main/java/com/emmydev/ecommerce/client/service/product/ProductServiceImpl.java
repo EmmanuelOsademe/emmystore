@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Optional<Product> findProductByName(String productName) {
-        Optional<Product> dbProduct = productRepository.findByName(productName);
+        Optional<Product> dbProduct = productRepository.findByNameIgnoreCase(productName);
         return dbProduct;
     }
 
@@ -118,6 +118,23 @@ public class ProductServiceImpl implements ProductService{
                 .responseCode(ResponseCodes.SUCCESS)
                 .message("Products successfully fetch")
                 .data(products)
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> findProductById(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+
+        if(product.isPresent()){
+            return ResponseDto.builder()
+                    .responseCode(ResponseCodes.SUCCESS)
+                    .message("Product successfully fetched")
+                    .data(product.get())
+                    .build();
+        }
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.INVALID_INPUT)
+                .message("Product not found")
                 .build();
     }
 

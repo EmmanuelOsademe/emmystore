@@ -48,4 +48,8 @@ public class ProductController {
         return ResponseEntity.ok(productService.fetchProductsByCategory(category, pageRequestDto));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto<Object>> fetchSingleProduct(@PathVariable Long id){
+        return ResponseEntity.ok(productService.findProductById(id));
+    }
 }

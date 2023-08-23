@@ -73,10 +73,8 @@ public class UserServiceImpl implements UserService {
         user.setLastName(userDto.getLastName());
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        log.info(user.toString());
 
         List<Role> roleList = roleRepository.findAll();
-        log.info(String.valueOf(roleList.size()));
 
         if(roleList.size() == 0){
             Role admin = new Role();

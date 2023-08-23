@@ -22,4 +22,6 @@ public interface ProductService {
     ResponseDto<Object> fetchProductsByCategory(String category, PageRequestDto pageRequestDto);
 
     ResponseDto<Object> updateProducts(ProductUpdateDto[] productUpdateDtos);
+
+    ResponseDto<Object> findProductById(Long id);
 }
