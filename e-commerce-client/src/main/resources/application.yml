@@ -19,8 +19,8 @@ spring:
     hibernate:
       ddl-auto: create-drop
   mail:
-    host: smtp.gmail.com
-    port: 587
+    host: ${EMAIL_HOST}
+    port: ${EMAIL_POST}
     username: ${EMAIL_USERNAME}
     password: ${EMAIL_PASSWORD}
     properties:
@@ -51,8 +51,8 @@ spring:
     hibernate:
       ddl-auto: create-drop
   mail:
-    host: smtp.gmail.com
-    port: 587
+    host: ${EMAIL_HOST}
+    port: ${EMAIL_PORT}
     username: ${EMAIL_USERNAME}
     password: ${EMAIL_PASSWORD}
     properties:
