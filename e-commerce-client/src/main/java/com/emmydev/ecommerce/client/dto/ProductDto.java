@@ -22,7 +22,7 @@ public class ProductDto {
     private String description;
 
     @NotBlank(message = "Product price cannot be empty")
-    private double price;
+    private Integer price;
 
     @NotBlank(message = "Product image cannot be empty")
     private String image;

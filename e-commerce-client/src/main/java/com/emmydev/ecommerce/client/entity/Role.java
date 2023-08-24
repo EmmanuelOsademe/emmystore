@@ -5,10 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 
 @Data
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "ROLES")
 public class Role {

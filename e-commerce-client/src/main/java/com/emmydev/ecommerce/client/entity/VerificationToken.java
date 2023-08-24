@@ -14,7 +14,6 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class VerificationToken {
 
     private static final int EXPIRATION_TIME = 10;

@@ -1,7 +1,6 @@
 package com.emmydev.ecommerce.client.dto;
 
 import com.emmydev.ecommerce.client.entity.Address;
-import com.emmydev.ecommerce.client.entity.Product;
 import com.emmydev.ecommerce.client.validation.ValidOrder;
 import lombok.Builder;
 import lombok.Data;
@@ -14,22 +13,24 @@ import java.util.List;
 @ValidOrder
 public class OrderDto {
     @NotBlank(message = "Products cannot be empty")
-    private List<Product> products;
+    private List<OrderProductDto> products;
 
     @NotBlank(message = "Tax cannot be empty")
-    private Double tax;
+    private Long tax;
 
-    @NotBlank(message = "Shipping fee cannot be empty")
-    private Double shippingFee;
+    private Long shippingFee;
 
     @NotBlank(message = "Subtotal cannot be empty")
-    private Double subTotal;
+    private Long subTotal;
 
     @NotBlank(message = "Total cannot be empty")
-    private Double total;
+    private Long total;
 
     @NotBlank(message = "Delivery option cannot be empty")
     private String deliveryOption;
 
     private Address address;
+
+    @NotBlank(message = "Stripe token cannot be empty")
+    private String stripeToken;
 }

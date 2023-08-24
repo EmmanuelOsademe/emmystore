@@ -3,7 +3,6 @@ package com.emmydev.ecommerce.client.entity;
 import com.emmydev.ecommerce.client.enums.Manufacturer;
 import com.emmydev.ecommerce.client.enums.ProductCategory;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +10,6 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "PRODUCTS")
@@ -28,7 +26,7 @@ public class Product {
     private String description;
 
     @Column(nullable = false)
-    private double price;
+    private Integer price;
 
     @Column(nullable = false)
     private  String image;

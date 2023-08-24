@@ -59,7 +59,6 @@ public class ProductServiceImpl implements ProductService{
                 .build();
     }
 
-
     @Override
     public Optional<Product> findProductByName(String productName) {
         Optional<Product> dbProduct = productRepository.findByNameIgnoreCase(productName);

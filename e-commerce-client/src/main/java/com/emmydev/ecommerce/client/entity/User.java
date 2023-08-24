@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(name = "USERS")
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

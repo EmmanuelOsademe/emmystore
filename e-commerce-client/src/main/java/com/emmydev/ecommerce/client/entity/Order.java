@@ -3,7 +3,6 @@ package com.emmydev.ecommerce.client.entity;
 import com.emmydev.ecommerce.client.enums.DeliveryOption;
 import com.emmydev.ecommerce.client.enums.OrderStatus;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,10 +11,9 @@ import java.util.List;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ORDERS")
+@Table(name = "ORDER")
 public class Order {
 
     @Id
@@ -31,19 +29,19 @@ public class Order {
             referencedColumnName = "orderId"
     )
     @Column(nullable = false)
-    private List<Product> products;
+    private List<OrderProduct> products;
 
     @Column(nullable = false)
-    private Double tax;
+    private Long tax;
 
     @Column(nullable = false)
-    private Double shippingFee;
+    private Long shippingFee;
 
     @Column(nullable = false)
-    private Double subTotal;
+    private Long subTotal;
 
     @Column(nullable = false)
-    private Double total;
+    private Long total;
 
     @Column(nullable = false)
     private OrderStatus orderStatus = OrderStatus.PENDING;
@@ -53,25 +51,23 @@ public class Order {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(
-            name = "user_id",
+            name = "order_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "FK_USER_VERIFY_TOKEN")
+            foreignKey = @ForeignKey(name = "FK_ORDER_ID")
     )
-    @Column(nullable = false)
     private Address address;
 
     @Column(nullable = false)
-    private String clientSecret;
+    private String chargeId;
 
     @Column(nullable = false)
-    private String paymentIntent;
+    private String balanceTransactionId;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "user_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "FK_USER_VERIFY_TOKEN")
+            foreignKey = @ForeignKey(name = "FK_ORDER_ID")
     )
-    @Column(nullable = false)
     private User user;
 }

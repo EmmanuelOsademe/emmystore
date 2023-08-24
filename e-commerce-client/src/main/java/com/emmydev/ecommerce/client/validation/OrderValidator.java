@@ -16,6 +16,20 @@ public class OrderValidator implements ConstraintValidator<ValidOrder, Object> {
     public boolean isValid(Object obj, ConstraintValidatorContext constraintValidatorContext) {
         OrderDto orderDto = (OrderDto) obj;
 
-        return orderDto.getDeliveryOption().equalsIgnoreCase("home-delivery") && Objects.nonNull(orderDto.getAddress());
+        boolean validHomeDelivery = true;
+        if(orderDto.getDeliveryOption().equalsIgnoreCase("home-delivery") &&
+                (Objects.isNull(orderDto.getAddress()) || Objects.isNull(orderDto.getShippingFee()))
+        ){
+            validHomeDelivery = false;
+        }
+
+        boolean validPickup = true;
+        if(orderDto.getDeliveryOption().equalsIgnoreCase("pick-up") &&
+                Objects.nonNull(orderDto.getShippingFee())
+        ){
+            validPickup = false;
+        }
+
+        return validHomeDelivery && validPickup;
     }
 }

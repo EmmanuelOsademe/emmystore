@@ -119,4 +119,37 @@ public class ErrorHandlingControllerAdvice  {
         log.error(ex.toString());
         return errorResponse;
     }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ValidationErrorResponseDto onProductNotFoundException(ProductNotFoundException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Runtime error", ex.getMessage()));
+        log.error(ex.getMessage());
+        log.error(ex.toString());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(ComputationErrorException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ValidationErrorResponseDto onComputationException(ComputationErrorException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Runtime error", ex.getMessage()));
+        log.error(ex.getMessage());
+        log.error(ex.toString());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(OutOfStockException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ValidationErrorResponseDto onOutOfStockException(OutOfStockException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Runtime error", ex.getMessage()));
+        log.error(ex.getMessage());
+        log.error(ex.toString());
+        return errorResponse;
+    }
 }

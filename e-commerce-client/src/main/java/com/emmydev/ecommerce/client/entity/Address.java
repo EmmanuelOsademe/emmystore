@@ -10,7 +10,6 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "ADDRESSES")
@@ -18,7 +17,7 @@ public class Address {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    private Long addressId;
 
     @Column(nullable = false)
     private String houseAddress;
