@@ -16,7 +16,7 @@ public class OrderProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    private Long orderProductId;
 
     @ManyToOne(
             cascade = CascadeType.ALL,
@@ -24,10 +24,19 @@ public class OrderProduct {
     )
     @JoinColumn(
             name = "product_id",
-            referencedColumnName = "productId"
+            referencedColumnName = "id"
     )
-    @Column(nullable = false)
     private Product product;
+
+    @ManyToOne(
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER
+    )
+    @JoinColumn(
+            name = "order_id",
+            referencedColumnName = "orderId"
+    )
+    private Order order;
 
     @Column(nullable = false)
     private Integer quantity;

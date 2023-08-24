@@ -28,7 +28,6 @@ public class Order {
             name = "order_id",
             referencedColumnName = "orderId"
     )
-    @Column(nullable = false)
     private List<OrderProduct> products;
 
     @Column(nullable = false)

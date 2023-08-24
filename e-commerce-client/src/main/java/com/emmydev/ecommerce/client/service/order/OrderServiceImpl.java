@@ -4,10 +4,7 @@ import com.emmydev.ecommerce.client.dto.OrderDto;
 import com.emmydev.ecommerce.client.dto.OrderProductDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
 import com.emmydev.ecommerce.client.dto.StripeChargeDto;
-import com.emmydev.ecommerce.client.entity.Address;
-import com.emmydev.ecommerce.client.entity.Order;
-import com.emmydev.ecommerce.client.entity.OrderProduct;
-import com.emmydev.ecommerce.client.entity.Product;
+import com.emmydev.ecommerce.client.entity.*;
 import com.emmydev.ecommerce.client.enums.OrderStatus;
 import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import com.emmydev.ecommerce.client.exception.ComputationErrorException;
@@ -19,6 +16,7 @@ import com.emmydev.ecommerce.client.repository.OrderRepository;
 import com.emmydev.ecommerce.client.repository.ProductRepository;
 import com.emmydev.ecommerce.client.service.JwtService;
 import com.emmydev.ecommerce.client.service.StripeService;
+import com.emmydev.ecommerce.client.service.user.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +39,9 @@ public class OrderServiceImpl implements OrderService{
 
     private final StripeService stripeService;
 
-    //private final JwtService jwtService;
+    private final JwtService jwtService;
+
+    private final UserService userService;
 
     @Override
     public ResponseDto<Object> createOrder(OrderDto orderDto, final HttpServletRequest request) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException {
@@ -49,8 +49,8 @@ public class OrderServiceImpl implements OrderService{
         List<OrderProduct> orderProducts = validateProducts(orderDto);
 
         // Get the token from the header and extract the user's email
-//        String jwt = request.getHeader("Authorization").substring(7);
-//        String email = jwtService.extractUsername(jwt);
+        String jwt = request.getHeader("Authorization").substring(7);
+        String email = jwtService.extractUsername(jwt);
 
         // Configure the StripeChargeDto and charge the user using Stripe
         StripeChargeDto chargeDto = StripeChargeDto
@@ -58,7 +58,7 @@ public class OrderServiceImpl implements OrderService{
                 .amount(orderDto.getTotal())
                 .description(orderDto.getProducts().toString())
                 .currency(StripeChargeDto.Currency.USD)
-                .stripeEmail("email")
+                .stripeEmail(email)
                 .stripeToken(orderDto.getStripeToken())
                 .build();
 
@@ -67,14 +67,31 @@ public class OrderServiceImpl implements OrderService{
         Address address = null;
         // Save the user's address if address is part of the request body
         if(Objects.nonNull(orderDto.getAddress())){
-            address.setHouseAddress(orderDto.getAddress().getHouseAddress());
-            address.setCity(orderDto.getAddress().getCity());
-            address.setState(orderDto.getAddress().getState());
-            address.setCountry(orderDto.getAddress().getCountry());
-            address.setZipCode(orderDto.getAddress().getZipCode());
+            // Search the database for the address
+            List<Address> addresses = addressRepository.findByHouseAddressAndCityAndStateAndCountry(
+                    orderDto.getAddress().getHouseAddress(),
+                    orderDto.getAddress().getCity(),
+                    orderDto.getAddress().getState(),
+                    orderDto.getAddress().getCountry()
+            );
 
-            address = addressRepository.save(address);
+            // Get address if the address exists. Otherwise, save the new address
+            if(addresses.size() > 0){
+                address = addresses.get(0);
+            }else{
+                address.setHouseAddress(orderDto.getAddress().getHouseAddress().toLowerCase());
+                address.setCity(orderDto.getAddress().getCity().toLowerCase());
+                address.setState(orderDto.getAddress().getState().toLowerCase());
+                address.setCountry(orderDto.getAddress().getCountry().toLowerCase());
+                address.setZipCode(orderDto.getAddress().getZipCode());
+
+                address = addressRepository.save(address);
+            }
         }
+
+        // Get the user from the email
+        User user = userService.findUserByEmail(email).get();
+
 
         // Create the new order object and save it;
         Order order = new Order();
@@ -86,6 +103,7 @@ public class OrderServiceImpl implements OrderService{
         order.setChargeId(charge.getId());
         order.setOrderStatus(matchStatus(charge.getStatus()));
         order.setBalanceTransactionId(charge.getBalanceTransaction());
+        order.setUser(user);
         if(Objects.nonNull(address)){
             order.setAddress(address);
         }
@@ -93,7 +111,7 @@ public class OrderServiceImpl implements OrderService{
 
         // Update the single products with the order ID and save them;
         for(OrderProduct orderProduct: orderProducts){
-            orderProduct.setOrderId(savedOrder.getOrderId());
+            orderProduct.setOrder(savedOrder);
         }
         orderProductRepository.saveAll(orderProducts);
 
