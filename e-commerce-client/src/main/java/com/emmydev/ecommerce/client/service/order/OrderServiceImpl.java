@@ -187,9 +187,39 @@ public class OrderServiceImpl implements OrderService{
                 .build();
     }
 
+//    @Override
+//    public ResponseDto<Object> fetchOrdersByCity(String city, PageRequestDto pageRequestDto) {
+//        return null;
+//    }
+
     @Override
-    public ResponseDto<Object> fetchOrdersByCity(String city, PageRequestDto pageRequestDto) {
-        return null;
+    public ResponseDto<Object> fetchOrdersByAddress(AddressDto addressDto, PageRequestDto pageRequestDto) {
+        // Create the page;
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+
+        Page<Order> orders = null;
+
+        if(Objects.nonNull(addressDto.getZipCode()) && Objects.nonNull(addressDto.getCity()) &&
+        Objects.nonNull(addressDto.getState()) && Objects.nonNull(addressDto.getCountry())){
+            orders = orderRepository.findByAddress_zipCodeAndAddress_cityAndAddress_stateAndAddress_country(
+                    addressDto.getZipCode(), addressDto.getCity(), addressDto.getState(), addressDto.getCountry(), pageable
+            );
+        }else if(Objects.nonNull(addressDto.getCity()) && Objects.nonNull(addressDto.getState()) && Objects.nonNull(addressDto.getCountry())){
+            orders = orderRepository.findByAddress_cityAndAddress_stateAndAddress_country(addressDto.getCity(), addressDto.getState(),
+                    addressDto.getCountry(), pageable);
+        }else if(Objects.nonNull(addressDto.getState()) && Objects.nonNull(addressDto.getCountry())){
+            orders = orderRepository.findByAddress_stateAndAddress_country(addressDto.getState(), addressDto.getCountry(), pageable);
+        }else if(Objects.nonNull(addressDto.getCountry())){
+            orders = orderRepository.findByAddress_country(addressDto.getCountry(), pageable);
+        }else{
+            orders = orderRepository.findAll(pageable);
+        }
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(orders)
+                .build();
     }
 
     private List<OrderProduct> validateProducts(OrderDto orderDto) throws ProductNotFoundException, OutOfStockException, ComputationErrorException {

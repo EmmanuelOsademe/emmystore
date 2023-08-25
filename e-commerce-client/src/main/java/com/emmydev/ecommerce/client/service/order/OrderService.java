@@ -1,9 +1,6 @@
 package com.emmydev.ecommerce.client.service.order;
 
-import com.emmydev.ecommerce.client.dto.DateRangeDto;
-import com.emmydev.ecommerce.client.dto.OrderDto;
-import com.emmydev.ecommerce.client.dto.PageRequestDto;
-import com.emmydev.ecommerce.client.dto.ResponseDto;
+import com.emmydev.ecommerce.client.dto.*;
 import com.emmydev.ecommerce.client.entity.Order;
 import com.emmydev.ecommerce.client.exception.ComputationErrorException;
 import com.emmydev.ecommerce.client.exception.OutOfStockException;
@@ -24,5 +21,7 @@ public interface OrderService {
 
     ResponseDto<Object> fetchOrdersByStatus(String status, PageRequestDto pageRequestDto);
 
-    ResponseDto<Object> fetchOrdersByCity(String city, PageRequestDto pageRequestDto);
+//    ResponseDto<Object> fetchOrdersByCity(String city, PageRequestDto pageRequestDto);
+
+    ResponseDto<Object> fetchOrdersByAddress(AddressDto addressDto, PageRequestDto pageRequestDto);
 }

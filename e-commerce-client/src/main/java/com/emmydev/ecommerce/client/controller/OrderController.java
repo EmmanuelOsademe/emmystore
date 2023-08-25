@@ -19,7 +19,7 @@ import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping
+@RequestMapping("/order")
 public class OrderController {
 
     private final OrderService orderService;

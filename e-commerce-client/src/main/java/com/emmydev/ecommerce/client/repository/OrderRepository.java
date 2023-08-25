@@ -23,6 +23,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findByOrderStatus(OrderStatus orderStatus, Pageable pageable);
 
-    @Query("SELECT order FROM ORDERS where order.address.city = ?1")
-    Page<Order> findOrdersByCity(String city, Pageable pageable);
+//    @Query("SELECT order FROM ORDERS where order.address.city = ?1")
+//    Page<Order> findOrdersByCity(String city, Pageable pageable);
+
+
+    Page<Order> findByAddress_country(String country, Pageable pageable);
+
+    Page<Order> findByAddress_stateAndAddress_country(String state, String country, Pageable pageable);
+
+    Page<Order> findByAddress_cityAndAddress_stateAndAddress_country(String city, String state, String country, Pageable pageable);
+
+    Page<Order> findByAddress_zipCodeAndAddress_cityAndAddress_stateAndAddress_country(Integer zipCode, String city, String state, String country, Pageable pageable);
 }
