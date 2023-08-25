@@ -11,5 +11,5 @@ import com.stripe.exception.StripeException;
 import javax.servlet.http.HttpServletRequest;
 
 public interface OrderService {
-    ResponseDto<Object> createOrder(OrderDto orderDto, HttpServletRequest request) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException;
+    ResponseDto<Object> createOrder(OrderDto orderDto, String jwtToken) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException;
 }

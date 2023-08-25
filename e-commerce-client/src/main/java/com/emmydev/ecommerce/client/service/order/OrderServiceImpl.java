@@ -44,13 +44,12 @@ public class OrderServiceImpl implements OrderService{
     private final UserService userService;
 
     @Override
-    public ResponseDto<Object> createOrder(OrderDto orderDto, final HttpServletRequest request) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException {
+    public ResponseDto<Object> createOrder(OrderDto orderDto, String jwtToken) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException {
         // Validate the products
         List<OrderProduct> orderProducts = validateProducts(orderDto);
 
-        // Get the token from the header and extract the user's email
-        String jwt = request.getHeader("Authorization").substring(7);
-        String email = jwtService.extractUsername(jwt);
+        // Get the user's email from the token
+        String email = jwtService.extractUsername(jwtToken);
 
         // Configure the StripeChargeDto and charge the user using Stripe
         StripeChargeDto chargeDto = StripeChargeDto
@@ -97,7 +96,7 @@ public class OrderServiceImpl implements OrderService{
 
         // Create the new order object and save it;
         Order order = new Order();
-        order.setProducts(orderProducts);
+        order.setProducts(savedOrderProducts);
         order.setTax(orderDto.getTax());
         order.setShippingFee(order.getShippingFee());
         order.setSubTotal(orderDto.getSubTotal());

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -40,7 +41,7 @@ public class RegistrationController {
 
         publisher.publishEvent(new RegistrationCompleteEvent(user, getApplicationUrl(request)));
 
-        if(user.getRole().getRole() == "ADMIN"){
+        if(Objects.equals(user.getRole().getRole(), "ADMIN")){
             return "You account has been registered as admin";
         }
         return "Your account has been registered.\nPlease check your mail to verify your account";
