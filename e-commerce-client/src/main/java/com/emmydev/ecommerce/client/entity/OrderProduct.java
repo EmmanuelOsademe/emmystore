@@ -24,24 +24,10 @@ public class OrderProduct {
     )
     @JoinColumn(
             name = "product_id",
-            referencedColumnName = "id"
+            referencedColumnName = "productId"
     )
     private Product product;
 
-    @ManyToOne(
-            cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER
-    )
-    @JoinColumn(
-            name = "order_id",
-            referencedColumnName = "orderId"
-    )
-    private Order order;
-
     @Column(nullable = false)
     private Integer quantity;
-
-    private Date createdAt = new Date();
-
-    private Date updatedAt = new Date();
 }

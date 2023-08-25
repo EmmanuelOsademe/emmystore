@@ -26,10 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -84,7 +81,7 @@ public class UserServiceImpl implements UserService {
             user.setRole(admin);
         }else{
             Optional<Role> role = roleRepository.findByRole("USER");
-            if(!role.isPresent()){
+            if(role.isEmpty()){
                 Role newRole = new Role();
                 newRole.setRole("USER");
                 roleRepository.save(newRole);
@@ -115,17 +112,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean validateRegistrationToken(String token) {
         // Attempt to get the verification token from the database
-        VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
         log.info(verificationToken.toString());
 
         // If token not found, return Invalid token
-        if(verificationToken == null){
+        if(verificationToken.isEmpty()){
             log.error("Invalid token");
             return false;
         }
 
         // Get the User from the token
-        User user = verificationToken.getUser();
+        User user = verificationToken.get().getUser();
 
         // Check if user has been verified
         if(user.isEnabled()){
@@ -134,8 +131,8 @@ public class UserServiceImpl implements UserService {
 
         // Check to be sure that the token has not expired;
         Calendar calendar = Calendar.getInstance();
-        if((verificationToken.getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
-            verificationTokenRepository.delete(verificationToken);
+        if((verificationToken.get().getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
+            verificationTokenRepository.delete(verificationToken.get());
             log.error("Token has expired");
             return false;
         }
@@ -149,17 +146,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public VerificationToken generateNewVerificationToken(String oldToken) throws TokenNotFoundException {
         // Get existing verificationToken object using the token
-        VerificationToken verificationToken = verificationTokenRepository.findByToken(oldToken);
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(oldToken);
 
         // If the verificationToken does not exist, throw TokenNotFoundException
-        if(verificationToken == null){
+        if(verificationToken.isEmpty()){
             throw new TokenNotFoundException("Verification token does not exist");
         }
 
         // Update the verificationToken and save then new token
-        verificationToken.setToken(UUID.randomUUID().toString());
-        verificationTokenRepository.save(verificationToken);
-        return verificationToken;
+        VerificationToken token = verificationToken.get();
+        token.setToken(UUID.randomUUID().toString());
+        verificationTokenRepository.save(token);
+        return token;
     }
 
     @Override
@@ -174,10 +172,9 @@ public class UserServiceImpl implements UserService {
 
         // Create a password reset token and save it
         String token = UUID.randomUUID().toString();
-        PasswordResetToken resetToken = createPasswordResetToken(user.get(), token);
 
         // Return the token
-        return resetToken;
+        return createPasswordResetToken(user.get(), token);
     }
 
     @Override
@@ -241,21 +238,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public User validateOldPassword(String email, String oldPassword) throws UserNotFoundException {
         // Fetch old user details
-        User user = userRepository.findByEmail(email).get();
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if(user.isEmpty()){
+            throw new UserNotFoundException("User with " + email + " does not exist");
+        }
+
+        User dbUser = user.get();
 
         // Compare provided password with DbPassword
         String encodedOldPassword = passwordEncoder.encode(oldPassword);
         log.info(encodedOldPassword);
-        log.info(user.getPassword());
+        log.info(dbUser.getPassword());
 
-        boolean isMatch = passwordEncoder.matches(oldPassword, user.getPassword());
+        boolean isMatch = passwordEncoder.matches(oldPassword, dbUser.getPassword());
         log.info(String.valueOf(isMatch));
 
         if(!isMatch){
             throw new UserNotFoundException("Invalid credentials");
         }
 
-        return user;
+        return dbUser;
     }
 
     @Override

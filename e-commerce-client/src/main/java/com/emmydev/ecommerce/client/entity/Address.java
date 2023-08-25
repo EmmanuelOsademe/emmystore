@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 
 @Entity
@@ -34,4 +35,7 @@ public class Address {
     @Column(nullable = false)
     private String country;
 
+    private Date createdAt = new Date();
+
+    private Date updatedAt = new Date();
 }

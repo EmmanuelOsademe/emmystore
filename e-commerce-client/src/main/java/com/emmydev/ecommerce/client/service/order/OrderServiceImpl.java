@@ -92,6 +92,8 @@ public class OrderServiceImpl implements OrderService{
         // Get the user from the email
         User user = userService.findUserByEmail(email).get();
 
+        // Save the individual order products
+        List<OrderProduct> savedOrderProducts = orderProductRepository.saveAll(orderProducts);
 
         // Create the new order object and save it;
         Order order = new Order();
@@ -109,12 +111,6 @@ public class OrderServiceImpl implements OrderService{
         }
         Order savedOrder = orderRepository.save(order);
 
-        // Update the single products with the order ID and save them;
-        for(OrderProduct orderProduct: orderProducts){
-            orderProduct.setOrder(savedOrder);
-        }
-        orderProductRepository.saveAll(orderProducts);
-
         // Return the response
         return ResponseDto.builder()
                 .responseCode(ResponseCodes.SUCCESS)
@@ -128,9 +124,10 @@ public class OrderServiceImpl implements OrderService{
         Long subTotal = null;
 
         List<OrderProduct> orderedProducts = new ArrayList<>();
+        List<Product> products = new ArrayList<>();
 
         for(OrderProductDto orderProductDto: orderDto.getProducts()){
-            Optional<Product> product = productRepository.findById(orderProductDto.getProduct().getId());
+            Optional<Product> product = productRepository.findById(orderProductDto.getProduct().getProductId());
 
             // Throw an error if the product does not exist
             if(product.isEmpty()){
@@ -152,17 +149,20 @@ public class OrderServiceImpl implements OrderService{
 
             orderedProducts.add(orderProduct);
 
-            subTotal += dbProduct.getPrice() * orderProduct.getQuantity();
+            subTotal +=  (long) dbProduct.getPrice() * orderProduct.getQuantity();
 
             // Update the product database with the new quantity
             dbProduct.setAvailableQuantity(dbProduct.getAvailableQuantity() - orderProductDto.getQuantity());
-            productRepository.save(dbProduct);
+            products.add(dbProduct);
         }
 
         // Validate the integrity of the subtotal
         if(Objects.nonNull(subTotal) && !subTotal.equals(orderDto.getSubTotal())){
             throw new ComputationErrorException("Error computing Order subtotal");
         }
+
+        // Save all products after their quantity has been updated
+        productRepository.saveAll(products);
 
         return orderedProducts;
     }

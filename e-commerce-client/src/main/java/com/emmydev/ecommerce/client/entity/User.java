@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Data
@@ -16,7 +17,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     @Column(name = "FIRST_NAME", nullable = false)
     private String firstName;
@@ -41,4 +42,8 @@ public class User {
     private Role role;
 
     private boolean enabled = false;
+
+    private Date createdAt = new Date();
+
+    private Date updatedAt = new Date();
 }

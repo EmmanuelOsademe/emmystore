@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Data
@@ -17,7 +18,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long productId;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -58,4 +59,8 @@ public class Product {
 
     @Column(nullable = false)
     private String storeLocation;
+
+    private Date createdAt = new Date();
+
+    private Date updatedAt = new Date();
 }

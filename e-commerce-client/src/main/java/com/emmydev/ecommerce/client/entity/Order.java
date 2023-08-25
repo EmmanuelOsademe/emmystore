@@ -7,13 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ORDER")
+@Table(name = "ORDERS")
 public class Order {
 
     @Id
@@ -42,7 +43,6 @@ public class Order {
     @Column(nullable = false)
     private Long total;
 
-    @Column(nullable = false)
     private OrderStatus orderStatus = OrderStatus.PENDING;
 
     @Column(nullable = false)
@@ -52,7 +52,7 @@ public class Order {
     @JoinColumn(
             name = "order_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "FK_ORDER_ID")
+            foreignKey = @ForeignKey(name = "FK_ORDER_ADDRESS_ID")
     )
     private Address address;
 
@@ -66,7 +66,11 @@ public class Order {
     @JoinColumn(
             name = "user_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "FK_ORDER_ID")
+            foreignKey = @ForeignKey(name = "FK_ORDER_USER_ID")
     )
     private User user;
+
+    private Date createdAt = new Date();
+
+    private Date updatedAt = new Date();
 }

@@ -17,7 +17,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
   mail:
     host: ${EMAIL_HOST}
     port: ${EMAIL_POST}

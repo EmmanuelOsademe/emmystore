@@ -9,7 +9,6 @@ import com.emmydev.ecommerce.client.entity.Product;
 import com.emmydev.ecommerce.client.enums.Manufacturer;
 import com.emmydev.ecommerce.client.enums.ProductCategory;
 import com.emmydev.ecommerce.client.enums.ResponseCodes;
-import com.emmydev.ecommerce.client.exception.ProductAlreadyExistsException;
 import com.emmydev.ecommerce.client.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
