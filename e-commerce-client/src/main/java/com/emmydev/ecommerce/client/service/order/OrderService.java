@@ -23,4 +23,6 @@ public interface OrderService {
     ResponseDto<Object> fetchAllOrders(PageRequestDto pageRequestDto);
 
     ResponseDto<Object> fetchOrdersByStatus(String status, PageRequestDto pageRequestDto);
+
+    ResponseDto<Object> fetchOrdersByCity(String city, PageRequestDto pageRequestDto);
 }

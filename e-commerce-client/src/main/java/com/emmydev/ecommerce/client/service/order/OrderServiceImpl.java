@@ -187,6 +187,11 @@ public class OrderServiceImpl implements OrderService{
                 .build();
     }
 
+    @Override
+    public ResponseDto<Object> fetchOrdersByCity(String city, PageRequestDto pageRequestDto) {
+        return null;
+    }
+
     private List<OrderProduct> validateProducts(OrderDto orderDto) throws ProductNotFoundException, OutOfStockException, ComputationErrorException {
 
         Long subTotal = null;
