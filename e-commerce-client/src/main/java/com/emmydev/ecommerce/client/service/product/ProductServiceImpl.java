@@ -1,6 +1,5 @@
 package com.emmydev.ecommerce.client.service.product;
 
-import com.emmydev.ecommerce.client.config.DefaultProperties;
 import com.emmydev.ecommerce.client.dto.PageRequestDto;
 import com.emmydev.ecommerce.client.dto.ProductDto;
 import com.emmydev.ecommerce.client.dto.ProductUpdateDto;
@@ -28,9 +27,6 @@ public class ProductServiceImpl implements ProductService{
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private DefaultProperties defaultProperties;
 
     @Override
     public ResponseDto<Object> saveProduct(ProductDto[] productDtos){

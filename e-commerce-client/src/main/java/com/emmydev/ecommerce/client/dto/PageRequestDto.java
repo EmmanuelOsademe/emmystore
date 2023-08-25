@@ -1,6 +1,5 @@
 package com.emmydev.ecommerce.client.dto;
 
-import com.emmydev.ecommerce.client.config.DefaultProperties;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -11,9 +10,6 @@ import java.util.Objects;
 
 @Data
 public class PageRequestDto {
-    @Autowired
-    private DefaultProperties defaultProperties;
-
     private int pageNumber = 0;
     private int pageSize = 1;
     private Sort.Direction sort = Sort.Direction.ASC;
