@@ -2,6 +2,7 @@ package com.emmydev.ecommerce.client.dto;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,8 +11,12 @@ import java.util.Objects;
 
 @Data
 public class PageRequestDto {
-    private int pageNumber = 0;
-    private int pageSize = 1;
+
+    @Value("${PAGE_NUMBER}")
+    private int pageNumber;
+
+    @Value("${PAGE_SIZE}")
+    private int pageSize;
     private Sort.Direction sort = Sort.Direction.ASC;
 
     private String sortBy = "id";

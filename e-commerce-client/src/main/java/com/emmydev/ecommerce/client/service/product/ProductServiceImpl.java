@@ -63,13 +63,13 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ResponseDto<Object> fetchProducts(PageRequestDto pageRequestDto) {
 
-        Pageable pageable = new  PageRequestDto().getPageable(pageRequestDto);
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
 
         Page<Product> products = productRepository.findAll(pageable);
 
         return ResponseDto.builder()
                 .responseCode(ResponseCodes.SUCCESS)
-                .message("Products successfully fetch")
+                .message("Products successfully fetched")
                 .data(products)
                 .build();
     }

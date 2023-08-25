@@ -1,15 +1,13 @@
 package com.emmydev.ecommerce.client.service.order;
 
-import com.emmydev.ecommerce.client.dto.OrderDto;
-import com.emmydev.ecommerce.client.dto.OrderProductDto;
-import com.emmydev.ecommerce.client.dto.ResponseDto;
-import com.emmydev.ecommerce.client.dto.StripeChargeDto;
+import com.emmydev.ecommerce.client.dto.*;
 import com.emmydev.ecommerce.client.entity.*;
 import com.emmydev.ecommerce.client.enums.OrderStatus;
 import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import com.emmydev.ecommerce.client.exception.ComputationErrorException;
 import com.emmydev.ecommerce.client.exception.OutOfStockException;
 import com.emmydev.ecommerce.client.exception.ProductNotFoundException;
+import com.emmydev.ecommerce.client.exception.UserNotFoundException;
 import com.emmydev.ecommerce.client.repository.AddressRepository;
 import com.emmydev.ecommerce.client.repository.OrderProductRepository;
 import com.emmydev.ecommerce.client.repository.OrderRepository;
@@ -20,6 +18,8 @@ import com.emmydev.ecommerce.client.service.user.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -118,6 +118,75 @@ public class OrderServiceImpl implements OrderService{
                 .build();
     }
 
+    @Override
+    public ResponseDto<Object> fetchOrdersByUser(PageRequestDto pageRequestDto, String jwtToken) throws UserNotFoundException {
+
+        // Get the user's email from the token
+        String email = jwtService.extractUsername(jwtToken);
+
+        // Fetch the user;
+        Optional<User> user = userService.findUserByEmail(email);
+        if(user.isEmpty()) throw new UserNotFoundException("User with " + email + " not found");
+
+        User userData = user.get();
+
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+
+        Page<Order> orders = orderRepository.findByUser(userData, pageable);
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(orders)
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> fetchOrdersByDateRange(DateRangeDto dateRangeDto) {
+
+        // Create the pageable object from the DateRangeDto
+        Pageable pageable = new DateRangeDto().getPageable(dateRangeDto);
+
+        Page<Order> orders = orderRepository.findByCreatedAt(dateRangeDto.getStart(), dateRangeDto.getEnd(), pageable);
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(orders)
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> fetchAllOrders(PageRequestDto pageRequestDto) {
+        // Create the pageable object from the PageRequestDto
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+
+        Page<Order> orders = orderRepository.findAll(pageable);
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(orders)
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> fetchOrdersByStatus(String status, PageRequestDto pageRequestDto) {
+        // Get the order Status;
+        OrderStatus orderStatus = matchStatus(status);
+
+        // Create the page
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+
+        Page<Order> orders = orderRepository.findByOrderStatus(orderStatus, pageable);
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(orders)
+                .build();
+    }
+
     private List<OrderProduct> validateProducts(OrderDto orderDto) throws ProductNotFoundException, OutOfStockException, ComputationErrorException {
 
         Long subTotal = null;
@@ -144,7 +213,8 @@ public class OrderServiceImpl implements OrderService{
             // Create an instance of the ordered product and add it to the list
             OrderProduct orderProduct = new OrderProduct();
             orderProduct.setProduct(dbProduct);
-            orderProduct.setQuantity(orderProduct.getQuantity());
+            orderProduct.setQuantity(orderProductDto.getQuantity());
+            orderProduct.setSubTotal(((long) dbProduct.getPrice() * orderProductDto.getQuantity()));
 
             orderedProducts.add(orderProduct);
 
