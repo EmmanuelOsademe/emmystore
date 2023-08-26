@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Builder
 @Data
-public class AddressDto {
+public class AddressDto extends PageRequestDto {
 
     private Integer zipCode = null;
 

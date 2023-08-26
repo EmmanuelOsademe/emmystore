@@ -6,10 +6,7 @@ import com.emmydev.ecommerce.client.enums.DeliveryOption;
 import com.emmydev.ecommerce.client.enums.OrderStatus;
 import com.emmydev.ecommerce.client.enums.ResponseCodes;
 import com.emmydev.ecommerce.client.exception.*;
-import com.emmydev.ecommerce.client.repository.AddressRepository;
-import com.emmydev.ecommerce.client.repository.OrderProductRepository;
-import com.emmydev.ecommerce.client.repository.OrderRepository;
-import com.emmydev.ecommerce.client.repository.ProductRepository;
+import com.emmydev.ecommerce.client.repository.*;
 import com.emmydev.ecommerce.client.service.JwtService;
 import com.emmydev.ecommerce.client.service.StripeService;
 import com.emmydev.ecommerce.client.service.user.UserService;
@@ -39,6 +36,8 @@ public class OrderServiceImpl implements OrderService{
     private final JwtService jwtService;
 
     private final UserService userService;
+
+    private final UserRepository userRepository;
 
     @Override
     public ResponseDto<Object> createOrder(OrderDto orderDto, String jwtToken) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException, InvalidOptionException, UserNotFoundException {
@@ -122,14 +121,11 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public ResponseDto<Object> fetchOrdersByUser(PageRequestDto pageRequestDto, String jwtToken) throws UserNotFoundException {
-
-        // Get the user's email from the token
-        String email = jwtService.extractUsername(jwtToken);
+    public ResponseDto<Object> fetchOrdersByUser(PageRequestDto pageRequestDto, Long userId) throws UserNotFoundException {
 
         // Fetch the user;
-        Optional<User> user = userService.findUserByEmail(email);
-        if(user.isEmpty()) throw new UserNotFoundException("User with " + email + " not found");
+        Optional<User> user = userRepository.findByUserId(userId);
+        if(user.isEmpty()) throw new UserNotFoundException("User with " + userId + " not found");
 
         User userData = user.get();
 
@@ -210,9 +206,9 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public ResponseDto<Object> fetchOrdersByAddress(AddressDto addressDto, PageRequestDto pageRequestDto) {
+    public ResponseDto<Object> fetchOrdersByAddress(AddressDto addressDto) {
         // Create the page;
-        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+        Pageable pageable = new PageRequestDto().getPageable(addressDto);
 
         Page<Order> orders;
 
@@ -257,9 +253,9 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public ResponseDto<Object> updateOrderById(OrderUpdateDto orderUpdateDto) throws ObjectNotFoundException, InvalidOptionException {
+    public ResponseDto<Object> updateOrderById(OrderUpdateDto orderUpdateDto, Long orderId) throws ObjectNotFoundException, InvalidOptionException {
 
-        Optional<Order> orderData = orderRepository.findByOrderId(orderUpdateDto.getOrderId());
+        Optional<Order> orderData = orderRepository.findByOrderId(orderId);
 
         if(orderData.isEmpty()){
             throw new ObjectNotFoundException("Order with id: " + orderUpdateDto.getOrderStatus() + "not found");
