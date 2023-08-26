@@ -2,9 +2,7 @@ package com.emmydev.ecommerce.client.controller;
 
 import com.emmydev.ecommerce.client.dto.OrderDto;
 import com.emmydev.ecommerce.client.dto.ResponseDto;
-import com.emmydev.ecommerce.client.exception.ComputationErrorException;
-import com.emmydev.ecommerce.client.exception.OutOfStockException;
-import com.emmydev.ecommerce.client.exception.ProductNotFoundException;
+import com.emmydev.ecommerce.client.exception.*;
 import com.emmydev.ecommerce.client.service.order.OrderService;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/checkout")
-    public ResponseEntity<ResponseDto<Object>> saveOrder(@Valid @RequestBody OrderDto orderDto, final HttpServletRequest request) throws StripeException, OutOfStockException, ComputationErrorException, ProductNotFoundException {
+    public ResponseEntity<ResponseDto<Object>> saveOrder(@Valid @RequestBody OrderDto orderDto, final HttpServletRequest request) throws StripeException, OutOfStockException, ComputationErrorException, ProductNotFoundException, UserNotFoundException, InvalidOptionException {
         String jwtToken = request.getHeader("Authorization").substring(7);
         return ResponseEntity.ok(orderService.createOrder(orderDto, jwtToken));
     }

@@ -152,4 +152,26 @@ public class ErrorHandlingControllerAdvice  {
         log.error(ex.toString());
         return errorResponse;
     }
+
+    @ExceptionHandler(InvalidOptionException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ValidationErrorResponseDto onInvalidOptionException(InvalidOptionException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Runtime error", ex.getMessage()));
+        log.error(ex.getMessage());
+        log.error(ex.toString());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(ObjectNotFoundException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ValidationErrorResponseDto onObjectNotFoundException(ObjectNotFoundException ex){
+        ValidationErrorResponseDto errorResponse = new ValidationErrorResponseDto();
+        errorResponse.getViolationDtos().add(new ViolationDto("Runtime error", ex.getMessage()));
+        log.error(ex.getMessage());
+        log.error(ex.toString());
+        return errorResponse;
+    }
 }

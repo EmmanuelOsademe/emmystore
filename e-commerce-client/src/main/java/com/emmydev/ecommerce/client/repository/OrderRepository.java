@@ -1,16 +1,16 @@
 package com.emmydev.ecommerce.client.repository;
 
 import com.emmydev.ecommerce.client.entity.Order;
-import com.emmydev.ecommerce.client.entity.Product;
 import com.emmydev.ecommerce.client.entity.User;
+import com.emmydev.ecommerce.client.enums.DeliveryOption;
 import com.emmydev.ecommerce.client.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -21,11 +21,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findAll(Pageable pageable);
 
+    Optional<Order> findByOrderId(Long orderId);
+
     Page<Order> findByOrderStatus(OrderStatus orderStatus, Pageable pageable);
 
-//    @Query("SELECT order FROM ORDERS where order.address.city = ?1")
-//    Page<Order> findOrdersByCity(String city, Pageable pageable);
-
+    Page<Order> findByDeliveryOption(DeliveryOption option, Pageable pageable);
 
     Page<Order> findByAddress_country(String country, Pageable pageable);
 

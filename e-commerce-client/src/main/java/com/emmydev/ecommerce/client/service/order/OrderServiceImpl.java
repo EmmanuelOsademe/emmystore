@@ -2,12 +2,10 @@ package com.emmydev.ecommerce.client.service.order;
 
 import com.emmydev.ecommerce.client.dto.*;
 import com.emmydev.ecommerce.client.entity.*;
+import com.emmydev.ecommerce.client.enums.DeliveryOption;
 import com.emmydev.ecommerce.client.enums.OrderStatus;
 import com.emmydev.ecommerce.client.enums.ResponseCodes;
-import com.emmydev.ecommerce.client.exception.ComputationErrorException;
-import com.emmydev.ecommerce.client.exception.OutOfStockException;
-import com.emmydev.ecommerce.client.exception.ProductNotFoundException;
-import com.emmydev.ecommerce.client.exception.UserNotFoundException;
+import com.emmydev.ecommerce.client.exception.*;
 import com.emmydev.ecommerce.client.repository.AddressRepository;
 import com.emmydev.ecommerce.client.repository.OrderProductRepository;
 import com.emmydev.ecommerce.client.repository.OrderRepository;
@@ -22,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -44,7 +41,7 @@ public class OrderServiceImpl implements OrderService{
     private final UserService userService;
 
     @Override
-    public ResponseDto<Object> createOrder(OrderDto orderDto, String jwtToken) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException {
+    public ResponseDto<Object> createOrder(OrderDto orderDto, String jwtToken) throws ProductNotFoundException, ComputationErrorException, OutOfStockException, StripeException, InvalidOptionException, UserNotFoundException {
         // Validate the products
         List<OrderProduct> orderProducts = validateProducts(orderDto);
 
@@ -63,7 +60,7 @@ public class OrderServiceImpl implements OrderService{
 
         Charge charge = stripeService.charge(chargeDto);
 
-        Address address = null;
+        Address address = new Address();
         // Save the user's address if address is part of the request body
         if(Objects.nonNull(orderDto.getAddress())){
             // Search the database for the address
@@ -89,7 +86,12 @@ public class OrderServiceImpl implements OrderService{
         }
 
         // Get the user from the email
-        User user = userService.findUserByEmail(email).get();
+        Optional<User> userData = userService.findUserByEmail(email);
+        if(userData.isEmpty()){
+            throw new UserNotFoundException("User with " + email + "does not exist");
+        }
+
+        User user = userData.get();
 
         // Save the individual order products
         List<OrderProduct> savedOrderProducts = orderProductRepository.saveAll(orderProducts);
@@ -102,7 +104,8 @@ public class OrderServiceImpl implements OrderService{
         order.setSubTotal(orderDto.getSubTotal());
         order.setTotal(order.getTotal());
         order.setChargeId(charge.getId());
-        order.setOrderStatus(matchStatus(charge.getStatus()));
+        order.setOrderStatus(matchStatus(charge.getStatus().toLowerCase()));
+        order.setDeliveryOption(matchDeliveryOption(orderDto.getDeliveryOption().toLowerCase()));
         order.setBalanceTransactionId(charge.getBalanceTransaction());
         order.setUser(user);
         if(Objects.nonNull(address)){
@@ -171,9 +174,9 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public ResponseDto<Object> fetchOrdersByStatus(String status, PageRequestDto pageRequestDto) {
+    public ResponseDto<Object> fetchOrdersByStatus(String status, PageRequestDto pageRequestDto) throws InvalidOptionException {
         // Get the order Status;
-        OrderStatus orderStatus = matchStatus(status);
+        OrderStatus orderStatus = matchStatus(status.toLowerCase());
 
         // Create the page
         Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
@@ -187,17 +190,31 @@ public class OrderServiceImpl implements OrderService{
                 .build();
     }
 
-//    @Override
-//    public ResponseDto<Object> fetchOrdersByCity(String city, PageRequestDto pageRequestDto) {
-//        return null;
-//    }
+
+    @Override
+    public ResponseDto<Object> fetchOrdersByDeliveryOption(String deliveryOption, PageRequestDto pageRequestDto) throws InvalidOptionException {
+        // Get the delivery option
+        DeliveryOption validDeliveryOption = matchDeliveryOption(deliveryOption.toLowerCase());
+
+        // Create the page
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+
+        // Make the query
+        Page<Order> orders = orderRepository.findByDeliveryOption(validDeliveryOption, pageable);
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(orders)
+                .build();
+    }
 
     @Override
     public ResponseDto<Object> fetchOrdersByAddress(AddressDto addressDto, PageRequestDto pageRequestDto) {
         // Create the page;
         Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
 
-        Page<Order> orders = null;
+        Page<Order> orders;
 
         if(Objects.nonNull(addressDto.getZipCode()) && Objects.nonNull(addressDto.getCity()) &&
         Objects.nonNull(addressDto.getState()) && Objects.nonNull(addressDto.getCountry())){
@@ -219,6 +236,47 @@ public class OrderServiceImpl implements OrderService{
                 .responseCode(ResponseCodes.SUCCESS)
                 .message("Orders successfully fetched")
                 .data(orders)
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> fetchOrderById(Long orderId) throws ObjectNotFoundException {
+
+        // Fetch the order
+        Optional<Order> order = orderRepository.findByOrderId(orderId);
+
+        if(order.isEmpty()){
+            throw new ObjectNotFoundException("Order with id: " + orderId + "not found");
+        }
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(order.get())
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Object> updateOrderById(OrderUpdateDto orderUpdateDto) throws ObjectNotFoundException, InvalidOptionException {
+
+        Optional<Order> orderData = orderRepository.findByOrderId(orderUpdateDto.getOrderId());
+
+        if(orderData.isEmpty()){
+            throw new ObjectNotFoundException("Order with id: " + orderUpdateDto.getOrderStatus() + "not found");
+        }
+
+        Order order = orderData.get();
+
+        OrderStatus status = matchStatus(orderUpdateDto.getOrderStatus().toLowerCase());
+
+        order.setOrderStatus(status);
+
+        orderRepository.save(order);
+
+        return ResponseDto.builder()
+                .responseCode(ResponseCodes.SUCCESS)
+                .message("Orders successfully fetched")
+                .data(order)
                 .build();
     }
 
@@ -271,9 +329,9 @@ public class OrderServiceImpl implements OrderService{
         return orderedProducts;
     }
 
-    private OrderStatus matchStatus(String status){
+    private OrderStatus matchStatus(String status) throws InvalidOptionException {
 
-        OrderStatus outputStatus = null;
+        OrderStatus outputStatus;
 
         switch (status){
             case "succeeded":
@@ -288,8 +346,25 @@ public class OrderServiceImpl implements OrderService{
             case "delivered":
                 outputStatus = OrderStatus.DELIVERED;
                 break;
+            default: throw new InvalidOptionException(status + " is invalid");
+
         }
         return outputStatus;
     }
 
+    private DeliveryOption matchDeliveryOption(String deliveryOption) throws InvalidOptionException {
+        DeliveryOption option;
+
+        switch (deliveryOption){
+            case "pick-up":
+                option = DeliveryOption.PICK_UP;
+                break;
+            case "home-delivery":
+                option = DeliveryOption.HOME_DELIVERY;
+                break;
+            default:
+                throw new InvalidOptionException(deliveryOption + " is invalid");
+        }
+        return option;
+    }
 }
